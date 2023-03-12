@@ -11,38 +11,7 @@
 [![Go version](https://img.shields.io/github/go-mod/go-version/bilalcaliskan/s3-cleaner)](https://github.com/bilalcaliskan/s3-cleaner)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-## Required Steps
-- Single command is mostly enough to prepare project, it will prompt you with some questions about your new project:
-  ```shell
-  $ make -s prepare-initial-project
-  ```
-
-## Additional nice-to-have steps
-- If you want to build and publish Docker image:
-  - Ensure `DOCKER_USERNAME` has been added as **repository secret on GitHub**
-  - Ensure `DOCKER_PASSWORD` has been added as **repository secret on GitHub**
-  - Uncomment **line 178** to **line 185** in [.github/workflows/push.yml](.github/workflows/push.yml)
-  - Uncomment **line 32** to **line 50** in [build/package/.goreleaser.yaml](build/package/.goreleaser.yaml)
-- If you want to enable https://sonarcloud.io/ integration:
-  - Ensure your created repository from that template has been added to https://sonarcloud.io/
-  - Ensure `SONAR_TOKEN` has been added as **repository secret** on GitHub
-  - Ensure `SONAR_TOKEN` has been added as **dependabot secret** on GitHub
-  - Uncomment **line 149** in [.github/workflows/push.yml](.github/workflows/push.yml)
-  - Uncomment **line 94** to **line 123** in [.github/workflows/push.yml](.github/workflows/push.yml)
-- If you want to create banner:
-  - Generate a banner from [here](https://devops.datenkollektiv.de/banner.txt/index.html) and place it inside of [build/ci](build/ci) directory
-  - Uncomment **line 30** and **line 31** in [cmd/root.go](cmd/root.go)
-  - Run `go get -u github.com/dimiro1/banner`
-- If you want to release as Homebrew Formula:
-  - At first, you must have a **formula repository** like https://github.com/bilalcaliskan/homebrew-tap
-  - Ensure `TAP_GITHUB_TOKEN` has been added as **repository secret** on GitHub
-  - Uncomment **line 198** in [.github/workflows/push.yml](.github/workflows/push.yml)
-  - Uncomment **line 70** to **line 80** in [build/package/.goreleaser.yaml](build/package/.goreleaser.yaml)
-
-## Used Libraries
-- [spf13/cobra](https://github.com/spf13/cobra)
-- [stretchr/testify](https://github.com/stretchr/testify)
-- [go.uber.org/zap](https://go.uber.org/zap)
+TBD
 
 ## Development
 This project requires below tools while developing:
