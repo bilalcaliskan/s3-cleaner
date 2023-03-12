@@ -3,26 +3,26 @@ package cmd
 import (
 	"os"
 
-	"github.com/bilalcaliskan/golang-cli-template/internal/logging"
-	"github.com/bilalcaliskan/golang-cli-template/internal/options"
-	"github.com/bilalcaliskan/golang-cli-template/internal/version"
+	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
+	"github.com/bilalcaliskan/s3-cleaner/internal/options"
+	"github.com/bilalcaliskan/s3-cleaner/internal/version"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
 var (
-	opts *options.GolangCliTemplateOptions
+	opts *options.S3CleanerOptions
 	ver  = version.Get()
 )
 
 func init() {
-	opts = options.GetGolangCliTemplateOptions()
+	opts = options.GetS3CleanerOptions()
 	rootCmd.PersistentFlags().StringVarP(&opts.Foo, "foo", "", "", "")
 }
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     "golang-cli-template",
+	Use:     "s3-cleaner",
 	Short:   "",
 	Long:    ``,
 	Version: ver.GitVersion,
@@ -30,7 +30,7 @@ var rootCmd = &cobra.Command{
 		/*bannerBytes, _ := ioutil.ReadFile("banner.txt")
 		banner.Init(os.Stdout, true, false, strings.NewReader(string(bannerBytes)))*/
 
-		logging.GetLogger().Info("golang-cli-template is started",
+		logging.GetLogger().Info("s3-cleaner is started",
 			zap.String("appVersion", ver.GitVersion),
 			zap.String("goVersion", ver.GoVersion),
 			zap.String("goOS", ver.GoOs),

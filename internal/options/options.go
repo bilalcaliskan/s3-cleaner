@@ -1,14 +1,14 @@
 package options
 
-var golangCliTemplateOptions = &GolangCliTemplateOptions{}
+var s3CleanerOptions = &S3CleanerOptions{}
 
-// GolangCliTemplateOptions contains frequent command line and application options.
-type GolangCliTemplateOptions struct {
+// S3CleanerOptions contains frequent command line and application options.
+type S3CleanerOptions struct {
 	// Foo is the dummy option
 	Foo string
 }
 
-// GetGolangCliTemplateOptions returns the pointer of GolangCliTemplateOptions
-func GetGolangCliTemplateOptions() *GolangCliTemplateOptions {
-	return golangCliTemplateOptions
+// GetS3CleanerOptions returns the pointer of S3CleanerOptions
+func GetS3CleanerOptions() *S3CleanerOptions {
+	return s3CleanerOptions
 }

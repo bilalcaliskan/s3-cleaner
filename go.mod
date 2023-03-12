@@ -1,4 +1,4 @@
-module github.com/bilalcaliskan/golang-cli-template
+module github.com/bilalcaliskan/s3-cleaner
 
 go 1.20
 

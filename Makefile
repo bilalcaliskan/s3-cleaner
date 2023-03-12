@@ -133,8 +133,8 @@ PROJECT_NAME_PASCAL_CASE ?= $(shell read -p "'Pascal-cased' Project Name(ex: Dem
 PROJECT_NAME_CAMEL_CASE ?= $(shell read -p "'Camel-cased' Project Name(ex: demoProject): " project_name_camel_case; echo $$project_name_camel_case)
 prepare-initial-project:
 	grep -rl bilalcaliskan . --exclude={README.md,Makefile} --exclude-dir=.git --exclude-dir=.idea | xargs sed -i 's/bilalcaliskan/$(GITHUB_USERNAME)/g'
-	grep -rl demo-project-2 . --exclude={README.md,Makefile} --exclude-dir=.git --exclude-dir=.idea | xargs sed -i 's/demo-project-2/$(PROJECT_NAME)/g'
-	grep -rl DemoProject2 . --exclude={README.md,Makefile} --exclude-dir=.git --exclude-dir=.idea | xargs sed -i 's/DemoProject2/$(PROJECT_NAME_PASCAL_CASE)/g'
-	grep -rl demoProject2 . --exclude={README.md,Makefile} --exclude-dir=.git --exclude-dir=.idea | xargs sed -i 's/demoProject2/$(PROJECT_NAME_CAMEL_CASE)/g'
+	grep -rl s3-cleaner . --exclude={README.md,Makefile} --exclude-dir=.git --exclude-dir=.idea | xargs sed -i 's/s3-cleaner/$(PROJECT_NAME)/g'
+	grep -rl S3Cleaner . --exclude={README.md,Makefile} --exclude-dir=.git --exclude-dir=.idea | xargs sed -i 's/S3Cleaner/$(PROJECT_NAME_PASCAL_CASE)/g'
+	grep -rl s3Cleaner . --exclude={README.md,Makefile} --exclude-dir=.git --exclude-dir=.idea | xargs sed -i 's/s3Cleaner/$(PROJECT_NAME_CAMEL_CASE)/g'
 	echo "Please refer to *Additional nice-to-have steps* in README.md for additional features"
 	echo "Cheers!"
