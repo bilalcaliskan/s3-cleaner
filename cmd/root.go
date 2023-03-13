@@ -70,11 +70,7 @@ var rootCmd = &cobra.Command{
 		logger.Debug("trying to find files on bucket", zap.String("bucketName", opts.BucketName),
 			zap.String("region", opts.Region))
 
-		if err := aws.GetAllFiles(svc, opts); err != nil {
-			return err
-		}
-
-		return nil
+		return aws.GetAllFiles(svc, opts)
 	},
 }
 
