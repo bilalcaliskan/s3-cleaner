@@ -37,15 +37,16 @@ run-lint: lint-golangci-lint lint-revive
 
 .PHONY: lint-golangci-lint
 lint-golangci-lint:
-	$(info running golangci-lint...)
+	#$(info running golangci-lint...)
+	echo "running golangci-lint..."
 	$(LOCAL_BIN)/golangci-lint -v run ./... || (echo golangci-lint returned an error, exiting!; sh -c 'exit 1';)
-	$(info golangci-lint exited successfully!)
+	echo "golangci-lint exited successfully!"
 
 .PHONY: lint-revive
 lint-revive:
-	$(info running revive...)
+	echo "running revive..."
 	$(LOCAL_BIN)/revive -formatter=stylish -config=build/ci/.revive.toml -exclude ./vendor/... ./... || (echo revive returned an error, exiting!; sh -c 'exit 1';)
-	$(info revive exited successfully!)
+	echo "revive exited successfully!"
 
 .PHONY: upgrade-direct-deps
 upgrade-direct-deps: tidy
@@ -75,25 +76,25 @@ fmt: tools run-fmt run-ineffassign run-vet
 
 .PHONY: run-fmt
 run-fmt:
-	$(info running fmt...)
+	echo "running fmt..."
 	go fmt ./... || (echo fmt returned an error, exiting!; sh -c 'exit 1';)
-	$(info fmt exited successfully!)
+	echo "fmt exited successfully!"
 
 .PHONY: run-ineffassign
 run-ineffassign:
-	$(info running ineffassign...)
+	echo "running ineffassign..."
 	$(LOCAL_BIN)/ineffassign ./... || (echo ineffassign returned an error, exiting!; sh -c 'exit 1';)
-	$(info ineffassign exited successfully!)
+	echo "ineffassign exited successfully!"
 
 .PHONY: run-vet
 run-vet:
 	$(info running vet...)
 	go vet ./... || (echo vet returned an error, exiting!; sh -c 'exit 1';)
-	$(info vet exited successfully!)
+	echo "vet exited successfully!)"
 
 .PHONY: test
 test: tidy
-	$(info starting the test for whole module...)
+	echo "starting the test for whole module..."
 	go test -failfast -vet=off -race ./... || (echo an error while testing, exiting!; sh -c 'exit 1';)
 
 .PHONY: test-with-coverage
@@ -106,35 +107,10 @@ update: tidy
 
 .PHONY: build
 build: tidy
-	$(info building binary...)
+	echo "building binary..."
 	go build -o bin/main main.go || (echo an error while building binary, exiting!; sh -c 'exit 1';)
-	$(info binary built successfully!)
+	echo "binary built successfully!"
 
 .PHONY: run
 run: tidy
 	go run main.go
-
-.PHONY: cross-compile
-cross-compile:
-	GOOS=freebsd GOARCH=386 go build -o bin/main-freebsd-386 main.go
-	GOOS=darwin GOARCH=386 go build -o bin/main-darwin-386 main.go
-	GOOS=linux GOARCH=386 go build -o bin/main-linux-386 main.go
-	GOOS=windows GOARCH=386 go build -o bin/main-windows-386 main.go
-	GOOS=freebsd GOARCH=amd64 go build -o bin/main-freebsd-amd64 main.go
-	GOOS=darwin GOARCH=amd64 go build -o bin/main-darwin-amd64 main.go
-	GOOS=linux GOARCH=amd64 go build -o bin/main-linux-amd64 main.go
-	GOOS=windows GOARCH=amd64 go build -o bin/main-windows-amd64 main.go
-
-
-.PHONY: prepare-initial-project
-GITHUB_USERNAME ?= $(shell read -p "Your Github username(ex: bilalcaliskan): " github_username; echo $$github_username)
-PROJECT_NAME ?= $(shell read -p "'Kebab-cased' Project Name(ex: demo-project): " project_name; echo $$project_name)
-PROJECT_NAME_PASCAL_CASE ?= $(shell read -p "'Pascal-cased' Project Name(ex: DemoProject): " project_name_pascal_case; echo $$project_name_pascal_case)
-PROJECT_NAME_CAMEL_CASE ?= $(shell read -p "'Camel-cased' Project Name(ex: demoProject): " project_name_camel_case; echo $$project_name_camel_case)
-prepare-initial-project:
-	grep -rl bilalcaliskan . --exclude={README.md,Makefile} --exclude-dir=.git --exclude-dir=.idea | xargs sed -i 's/bilalcaliskan/$(GITHUB_USERNAME)/g'
-	grep -rl s3-cleaner . --exclude={README.md,Makefile} --exclude-dir=.git --exclude-dir=.idea | xargs sed -i 's/s3-cleaner/$(PROJECT_NAME)/g'
-	grep -rl S3Cleaner . --exclude={README.md,Makefile} --exclude-dir=.git --exclude-dir=.idea | xargs sed -i 's/S3Cleaner/$(PROJECT_NAME_PASCAL_CASE)/g'
-	grep -rl s3Cleaner . --exclude={README.md,Makefile} --exclude-dir=.git --exclude-dir=.idea | xargs sed -i 's/s3Cleaner/$(PROJECT_NAME_CAMEL_CASE)/g'
-	echo "Please refer to *Additional nice-to-have steps* in README.md for additional features"
-	echo "Cheers!"
