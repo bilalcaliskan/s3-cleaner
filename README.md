@@ -13,6 +13,28 @@
 
 It is a tool for finding desired files in a S3 bucket and cleans them with a rule set.
 
+## Installation
+
+### Binary
+Binary can be downloaded from [Releases](https://github.com/bilalcaliskan/s3-cleaner/releases) page.
+
+After then, you can simply run binary by providing required command line arguments:
+```shell
+$ ./s3-cleaner start --accessKey=xxxxx --secretKey=xxxxx --region=xxxxx --bucketName=xxxxx
+```
+
+### Homebrew
+This project can be installed with [Homebrew](https://brew.sh/):
+```shell
+$ brew tap bilalcaliskan/tap
+$ brew install bilalcaliskan/tap/s3-cleaner
+```
+
+Then similar to binary method, you can run it by calling below command:
+```shell
+$ s3-cleaner start --accessKey=xxxxx --secretKey=xxxxx --region=xxxxx --bucketName=xxxxx
+```
+
 ## Configuration
 ```
 Usage:
