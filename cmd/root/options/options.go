@@ -1,5 +1,7 @@
 package options
 
+import "github.com/spf13/cobra"
+
 var rootOptions = &RootOptions{}
 
 type CtxKey struct{}
@@ -12,6 +14,8 @@ type RootOptions struct {
 	SecretKey string
 	// BucketName is the name of target bucket
 	BucketName string
+	// FileNamePrefix is the prefix of target bucket objects, means it can be used for folder-based object grouping buckets
+	FileNamePrefix string
 	// Region is the region of the target bucket
 	Region string
 	// VerboseLog is the verbosity of the logging library
@@ -21,4 +25,19 @@ type RootOptions struct {
 // GetRootOptions returns the pointer of S3CleanerOptions
 func GetRootOptions() *RootOptions {
 	return rootOptions
+}
+
+func InitFlags(cmd *cobra.Command, opts *RootOptions) {
+	cmd.PersistentFlags().StringVarP(&opts.BucketName, "bucketName", "", "", "name of "+
+		"the target bucket on S3")
+	cmd.PersistentFlags().StringVarP(&opts.FileNamePrefix, "fileNamePrefix", "", "",
+		"folder name of target bucket objects, means it can be used for folder-based object grouping buckets")
+	cmd.PersistentFlags().StringVarP(&opts.AccessKey, "accessKey", "", "",
+		"access key credential to access S3 bucket")
+	cmd.PersistentFlags().StringVarP(&opts.SecretKey, "secretKey", "", "",
+		"secret key credential to access S3 bucket")
+	cmd.PersistentFlags().StringVarP(&opts.Region, "region", "", "",
+		"region of the target bucket on S3")
+	cmd.PersistentFlags().BoolVarP(&opts.VerboseLog, "verbose", "", false,
+		"enable debug logging for the logging library")
 }
