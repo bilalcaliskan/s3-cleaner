@@ -40,4 +40,9 @@ func InitFlags(cmd *cobra.Command, opts *RootOptions) {
 		"region of the target bucket on S3")
 	cmd.PersistentFlags().BoolVarP(&opts.VerboseLog, "verbose", "", false,
 		"enable debug logging for the logging library")
+
+	_ = cmd.MarkFlagRequired("bucketName")
+	_ = cmd.MarkFlagRequired("accessKey")
+	_ = cmd.MarkFlagRequired("secretKey")
+	_ = cmd.MarkFlagRequired("region")
 }
