@@ -11,21 +11,28 @@
 [![Go version](https://img.shields.io/github/go-mod/go-version/bilalcaliskan/s3-cleaner)](https://github.com/bilalcaliskan/s3-cleaner)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+It is a tool for finding desired files in a S3 bucket and cleans them with a rule set.
+
 ## Configuration
 ```
-This tool finds the desired files in a bucket and cleans them
-
 Usage:
-  s3-cleaner [flags]
+  s3-cleaner start [flags]
 
 Flags:
-      --accessKey string    access key credential to access S3 bucket
-      --bucketName string   name of the target bucket on S3
-  -h, --help                help for s3-cleaner
-      --region string       region of the target bucket on S3
-      --secretKey string    secret key credential to access S3 bucket
-  -v, --version             version for s3-cleaner
+      --dryRun
+      --fileExtensions string
+  -h, --help                     help for start
+      --keepLastNFiles int        (default 1)
+      --maxFileSizeInBytes int    (default 15000000)
+      --minFileSizeInBytes int    (default 10000000)
 
+Global Flags:
+      --accessKey string        access key credential to access S3 bucket
+      --bucketName string       name of the target bucket on S3
+      --fileNamePrefix string   folder name of target bucket objects, means it can be used for folder-based object grouping buckets
+      --region string           region of the target bucket on S3
+      --secretKey string        secret key credential to access S3 bucket
+      --verbose                 enable debug logging for the logging library
 ```
 
 ## Development

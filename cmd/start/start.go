@@ -26,7 +26,7 @@ var (
 	// StartCmd represents the bar command
 	StartCmd = &cobra.Command{
 		Use:   "start",
-		Short: "A brief description of your command",
+		Short: "start subcommand starts the app, finds and clears desired files",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			rootOpts := cmd.Context().Value(rootopts.CtxKey{}).(*rootopts.RootOptions)
 
