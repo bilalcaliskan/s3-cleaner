@@ -58,11 +58,7 @@ var (
 			})
 
 			logger.Debug(fmt.Sprintf("length of result slice is %d", len(res)))
-			if err := aws.DeleteFiles(svc, rootOpts.BucketName, res[:len(res)-startOpts.KeepLastNFiles], startOpts.DryRun); err != nil {
-				return err
-			}
-
-			return nil
+			return aws.DeleteFiles(svc, rootOpts.BucketName, res[:len(res)-startOpts.KeepLastNFiles], startOpts.DryRun)
 		},
 	}
 )
