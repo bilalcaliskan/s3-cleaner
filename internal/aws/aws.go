@@ -51,7 +51,7 @@ func GetAllFiles(svc s3iface.S3API, opts *options.RootOptions) (*s3.ListObjectsO
 
 func DeleteFiles(svc s3iface.S3API, bucketName string, slice []*s3.Object, dryRun bool) error {
 	for _, v := range slice {
-		logger.Debug(fmt.Sprintf("will try to delete file %s with last modification time %v", *v.Key, *v.LastModified))
+		logger.Debug(fmt.Sprintf("will try to delete file %s with last modification date %v and size %f MB", *v.Key, *v.LastModified, float64(*v.Size)/1000000))
 
 		if !dryRun {
 			_, err := svc.DeleteObject(&s3.DeleteObjectInput{

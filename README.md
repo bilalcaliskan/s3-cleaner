@@ -45,8 +45,8 @@ Flags:
       --fileExtensions string    selects the files with defined extensions to clean from target bucket, "" means all files (default "")
   -h, --help                     help for start subcommand
       --keepLastNFiles int       defines how many of the files to skip deletion in specified criteria, 0 means clean them all (default 1)
-      --maxFileSizeInBytes int   maximum size in bytes to clean from target bucket, 0 means no upper limit (default 15000000)
-      --minFileSizeInBytes int   minimum size in bytes to clean from target bucket, 0 means no lower limit (default 10000000)
+      --maxFileSizeInMb int      maximum size in MB to clean from target bucket, 0 means no upper limit (default 15)
+      --minFileSizeInMb int      minimum size in MB to clean from target bucket, 0 means no lower limit (default 10)
       --sortBy string            defines the ascending order in the specified criteria, valid options are: lastModificationDate and size (default "lastModificationDate")
 
 Global Flags:

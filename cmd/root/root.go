@@ -29,7 +29,7 @@ func init() {
 	rootCmd.AddCommand(start.StartCmd)
 }
 
-// RootCmd represents the base command when called without any subcommands
+// Cmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "s3-cleaner",
 	Short:   "This tool finds the desired files in a bucket and cleans them",
