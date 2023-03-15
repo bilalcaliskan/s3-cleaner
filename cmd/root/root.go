@@ -3,6 +3,9 @@ package root
 import (
 	"context"
 	"os"
+	"strings"
+
+	"github.com/dimiro1/banner"
 
 	"github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
 	"github.com/bilalcaliskan/s3-cleaner/cmd/start"
@@ -33,8 +36,10 @@ var rootCmd = &cobra.Command{
 	Long:    ``,
 	Version: ver.GitVersion,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		//bannerBytes, _ := os.ReadFile("banner.txt")
-		//banner.Init(os.Stdout, true, false, strings.NewReader(string(bannerBytes)))
+		if _, err := os.Stat("build/ci/banner.txt"); err == nil {
+			bannerBytes, _ := os.ReadFile("build/ci/banner.txt")
+			banner.Init(os.Stdout, true, false, strings.NewReader(string(bannerBytes)))
+		}
 
 		if opts.VerboseLog {
 			logging.Atomic.SetLevel(zap.DebugLevel)
@@ -48,8 +53,7 @@ var rootCmd = &cobra.Command{
 			zap.String("gitCommit", ver.GitCommit),
 			zap.String("buildDate", ver.BuildDate))
 
-		ctx := context.WithValue(context.Background(), options.CtxKey{}, opts)
-		cmd.SetContext(ctx)
+		cmd.SetContext(context.WithValue(context.Background(), options.CtxKey{}, opts))
 
 		return nil
 	},
