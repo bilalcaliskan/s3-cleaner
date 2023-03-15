@@ -29,15 +29,20 @@ func GetRootOptions() *RootOptions {
 
 func InitFlags(cmd *cobra.Command, opts *RootOptions) {
 	cmd.PersistentFlags().StringVarP(&opts.BucketName, "bucketName", "", "", "name of "+
-		"the target bucket on S3")
+		"the target bucket on S3 (default \"\")")
 	cmd.PersistentFlags().StringVarP(&opts.FileNamePrefix, "fileNamePrefix", "", "",
-		"folder name of target bucket objects, means it can be used for folder-based object grouping buckets")
+		"folder name of target bucket objects, means it can be used for folder-based object grouping buckets (default \"\")")
 	cmd.PersistentFlags().StringVarP(&opts.AccessKey, "accessKey", "", "",
-		"access key credential to access S3 bucket")
+		"access key credential to access S3 bucket (default \"\")")
 	cmd.PersistentFlags().StringVarP(&opts.SecretKey, "secretKey", "", "",
-		"secret key credential to access S3 bucket")
+		"secret key credential to access S3 bucket (default \"\")")
 	cmd.PersistentFlags().StringVarP(&opts.Region, "region", "", "",
-		"region of the target bucket on S3")
+		"region of the target bucket on S3 (default \"\")")
 	cmd.PersistentFlags().BoolVarP(&opts.VerboseLog, "verbose", "", false,
-		"enable debug logging for the logging library")
+		"verbose output of the logging library (default false)")
+
+	_ = cmd.MarkFlagRequired("bucketName")
+	_ = cmd.MarkFlagRequired("accessKey")
+	_ = cmd.MarkFlagRequired("secretKey")
+	_ = cmd.MarkFlagRequired("region")
 }

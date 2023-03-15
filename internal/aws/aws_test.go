@@ -102,7 +102,7 @@ func TestDeleteFilesHappyPath(t *testing.T) {
 func TestDeleteFilesFailedDeleteObjectCall(t *testing.T) {
 	var input []*s3.Object
 	for i := 0; i < 3; i++ {
-		o := s3.Object{Key: aws.String("hello-world"), LastModified: aws.Time(time.Now())}
+		o := s3.Object{Key: aws.String("hello-world"), LastModified: aws.Time(time.Now()), Size: aws.Int64(10000000)}
 		input = append(input, &o)
 	}
 

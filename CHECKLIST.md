@@ -1,8 +1,14 @@
 - [x] folder based grouping target objects
-- [ ] sorting target objects:
+- [x] sorting target objects:
   - [x] sorting based on last modification time
-  - [ ] sorting based on size (may be additional option)
+  - [x] sorting based on size (may be additional option)
 - [x] partly unit testing
-- [ ] %85+ unit testing
+- [ ] %85+ unit testing (WIP)
 - [ ] what happens if we use that tool on `versioning enabled` buckets?
-- [ ]
+- [ ] different kind of cleaning strategies to clean bucket
+  - [x] bySize
+  - [ ] byExtension
+  - [ ] etc
+- [x] dry run
+- [x] flag validation for sortBy and maximum and minimum file sizes
+- [ ] interactive and/or non-interactive confirmation before real deletion
