@@ -41,20 +41,21 @@ Usage:
   s3-cleaner start [flags]
 
 Flags:
-      --dryRun
-      --fileExtensions string
-  -h, --help                     help for start
-      --keepLastNFiles int        (default 1)
-      --maxFileSizeInBytes int    (default 15000000)
-      --minFileSizeInBytes int    (default 10000000)
+      --dryRun                   specifies that if you just want to see what to delete or completely delete them all (default false)
+      --fileExtensions string    selects the files with defined extensions to clean from target bucket, "" means all files (default "")
+  -h, --help                     help for start subcommand
+      --keepLastNFiles int       defines how many of the files to skip deletion in specified criteria, 0 means clean them all (default 1)
+      --maxFileSizeInBytes int   maximum size in bytes to clean from target bucket, 0 means no upper limit (default 15000000)
+      --minFileSizeInBytes int   minimum size in bytes to clean from target bucket, 0 means no lower limit (default 10000000)
+      --sortBy string            defines the ascending order in the specified criteria, valid options are: lastModificationDate and size (default "lastModificationDate")
 
 Global Flags:
-      --accessKey string        access key credential to access S3 bucket
-      --bucketName string       name of the target bucket on S3
-      --fileNamePrefix string   folder name of target bucket objects, means it can be used for folder-based object grouping buckets
-      --region string           region of the target bucket on S3
-      --secretKey string        secret key credential to access S3 bucket
-      --verbose                 enable debug logging for the logging library
+      --accessKey string        access key credential to access S3 bucket (default "")
+      --bucketName string       name of the target bucket on S3 (default "")
+      --fileNamePrefix string   folder name of target bucket objects, means it can be used for folder-based object grouping buckets (default "")
+      --region string           region of the target bucket on S3 (default "")
+      --secretKey string        secret key credential to access S3 bucket (default "")
+      --verbose                 verbose output of the logging library (default false)
 ```
 
 ## Development
