@@ -4,7 +4,10 @@ import "github.com/spf13/cobra"
 
 var rootOptions = &RootOptions{}
 
-type CtxKey struct{}
+type (
+	OptsKey   struct{}
+	LoggerKey struct{}
+)
 
 // RootOptions contains frequent command line and application options.
 type RootOptions struct {

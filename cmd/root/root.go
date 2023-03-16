@@ -2,9 +2,10 @@ package root
 
 import (
 	"context"
-	"log"
 	"os"
 	"strings"
+
+	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
 
 	"github.com/dimiro1/banner"
 
@@ -38,10 +39,13 @@ var rootCmd = &cobra.Command{
 			banner.Init(os.Stdout, true, false, strings.NewReader(string(bannerBytes)))
 		}
 
-		log.Printf("s3-cleaner is started appVersion=%s goVersion=%s goOS=%s goArch=%s gitCommit=%s buildDate=%s",
-			ver.GitVersion, ver.GoVersion, ver.GoOs, ver.GoArch, ver.GitCommit, ver.BuildDate)
+		logger := logging.GetLogger()
+		logger.Info().Str("appVersion", ver.GitVersion).Str("goVersion", ver.GoVersion).Str("goOS", ver.GoOs).
+			Str("goArch", ver.GoArch).Str("gitCommit", ver.GitCommit).Str("buildDate", ver.BuildDate).
+			Msg("s3-cleaner is started!")
 
-		cmd.SetContext(context.WithValue(context.Background(), options.CtxKey{}, opts))
+		cmd.SetContext(context.WithValue(cmd.Context(), options.LoggerKey{}, logger))
+		cmd.SetContext(context.WithValue(cmd.Context(), options.OptsKey{}, opts))
 
 		return nil
 	},

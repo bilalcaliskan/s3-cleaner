@@ -31,6 +31,8 @@ var (
 		Use:   "start",
 		Short: "start subcommand starts the app, finds and clears desired files",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			logger = cmd.Context().Value(rootopts.LoggerKey{}).(zerolog.Logger)
+
 			if startOpts.MinFileSizeInMb > startOpts.MaxFileSizeInMb && (startOpts.MinFileSizeInMb != 0 && startOpts.MaxFileSizeInMb != 0) {
 				err := fmt.Errorf("minFileSizeInMb should be lower than maxFileSizeInMb")
 				logger.Error().Str("error", err.Error()).Msg("an error occured while validating flags")
@@ -47,7 +49,7 @@ var (
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			rootOpts := cmd.Context().Value(rootopts.CtxKey{}).(*rootopts.RootOptions)
+			rootOpts := cmd.Context().Value(rootopts.OptsKey{}).(*rootopts.RootOptions)
 
 			sess, err := aws.CreateSession(rootOpts)
 			if err != nil {
