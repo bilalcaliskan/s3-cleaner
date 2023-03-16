@@ -1,7 +1,10 @@
 package aws
 
 import (
-	"fmt"
+	"log"
+
+	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
+	"github.com/rs/zerolog"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -9,11 +12,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
-	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
-	"go.uber.org/zap"
 )
 
-var logger *zap.Logger
+var logger zerolog.Logger
 
 func init() {
 	logger = logging.GetLogger()
@@ -51,7 +52,9 @@ func GetAllFiles(svc s3iface.S3API, opts *options.RootOptions) (*s3.ListObjectsO
 
 func DeleteFiles(svc s3iface.S3API, bucketName string, slice []*s3.Object, dryRun bool) error {
 	for _, v := range slice {
-		logger.Debug(fmt.Sprintf("will try to delete file %s with last modification date %v and size %f MB", *v.Key, *v.LastModified, float64(*v.Size)/1000000))
+		logger.Info().Str("key", *v.Key).Time("lastModifiedDate", *v.LastModified).
+			Float64("size", float64(*v.Size)/1000000).Msg("will try to delete file")
+		//logger.Debug(fmt.Sprintf("will try to delete file %s with last modification date %v and size %f MB", *v.Key, *v.LastModified, float64(*v.Size)/1000000))
 
 		if !dryRun {
 			_, err := svc.DeleteObject(&s3.DeleteObjectInput{
@@ -60,12 +63,11 @@ func DeleteFiles(svc s3iface.S3API, bucketName string, slice []*s3.Object, dryRu
 			})
 
 			if err != nil {
-				logger.Error("an error occurred while deleting file", zap.String("fileName", *v.Key),
-					zap.String("error", err.Error()))
 				return err
 			}
 
-			logger.Info("successfully deleted file", zap.String("fileName", *v.Key))
+			log.Printf("successfully deleted file %s", *v.Key)
+			logger.Info().Str("key", *v.Key).Msg("successfully deleted file")
 		}
 	}
 

@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
+
 	"github.com/aws/aws-sdk-go/service/s3"
 	rootopts "github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
 	"github.com/bilalcaliskan/s3-cleaner/cmd/start/options"
 	"github.com/bilalcaliskan/s3-cleaner/internal/aws"
-	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
 	"github.com/bilalcaliskan/s3-cleaner/internal/utils"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 func init() {
@@ -22,7 +23,7 @@ func init() {
 }
 
 var (
-	logger          *zap.Logger
+	logger          zerolog.Logger
 	ValidSortByOpts = []string{"size", "lastModificationDate"}
 	startOpts       *options.StartOptions
 	// StartCmd represents the bar command
@@ -30,13 +31,17 @@ var (
 		Use:   "start",
 		Short: "start subcommand starts the app, finds and clears desired files",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			if startOpts.MinFileSizeInMb > startOpts.MaxFileSizeInMb {
-				return fmt.Errorf("minFileSizeInMb should be lower than maxFileSizeInMb")
+			if startOpts.MinFileSizeInMb > startOpts.MaxFileSizeInMb && (startOpts.MinFileSizeInMb != 0 && startOpts.MaxFileSizeInMb != 0) {
+				err := fmt.Errorf("minFileSizeInMb should be lower than maxFileSizeInMb")
+				logger.Error().Str("error", err.Error()).Msg("an error occured while validating flags")
+				return err
 			}
 
 			if !utils.Contains(ValidSortByOpts, startOpts.SortBy) {
-				return fmt.Errorf("no such sortBy option called %s, valid options are %v", startOpts.SortBy,
+				err := fmt.Errorf("no such sortBy option called %s, valid options are %v", startOpts.SortBy,
 					ValidSortByOpts)
+				logger.Error().Str("error", err.Error()).Msg("an error occurred while validating flags")
+				return err
 			}
 
 			return nil
@@ -46,14 +51,13 @@ var (
 
 			sess, err := aws.CreateSession(rootOpts)
 			if err != nil {
-				logger.Error("an error occurred while creating session", zap.Error(err))
+				logger.Error().Str("error", err.Error()).Msg("an error occurred while creating session")
 				return err
 			}
 
 			svc := s3.New(sess)
-
-			logger.Debug("trying to find files on bucket", zap.String("bucketName", rootOpts.BucketName),
-				zap.String("region", rootOpts.Region))
+			logger.Info().Str("bucket", rootOpts.BucketName).Str("region", rootOpts.Region).Msg("trying " +
+				"to find files on target bucket")
 
 			allFiles, err := aws.GetAllFiles(svc, rootOpts)
 			if err != nil {
@@ -62,7 +66,7 @@ var (
 
 			var res []*s3.Object
 			for _, v := range allFiles.Contents {
-				if *v.Size > startOpts.MinFileSizeInMb*1000000 && *v.Size < startOpts.MaxFileSizeInMb*1000000 {
+				if *v.Size >= startOpts.MinFileSizeInMb*1000000 && *v.Size < startOpts.MaxFileSizeInMb*1000000 {
 					res = append(res, v)
 				}
 			}
@@ -78,8 +82,22 @@ var (
 				})
 			}
 
-			logger.Debug(fmt.Sprintf("length of result slice is %d", len(res)))
-			return aws.DeleteFiles(svc, rootOpts.BucketName, res[:len(res)-startOpts.KeepLastNFiles], startOpts.DryRun)
+			if len(res) < startOpts.KeepLastNFiles {
+				logger.Warn().Str("bucket", rootOpts.BucketName).Str("region", rootOpts.Region).Msg("no " +
+					"file found with specified specs on target bucket")
+				return nil
+			}
+
+			if err := aws.DeleteFiles(svc, rootOpts.BucketName, res[:len(res)-startOpts.KeepLastNFiles], startOpts.DryRun); err != nil {
+				logger.Error().Str("error", err.Error()).Msg("an error occurred while deleting target files")
+				return err
+			}
+
+			if startOpts.DryRun {
+				logger.Info().Msg("skipping object deletion since --dryRun flag is passed")
+			}
+
+			return nil
 		},
 	}
 )

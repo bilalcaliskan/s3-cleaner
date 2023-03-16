@@ -12,3 +12,4 @@
 - [x] dry run
 - [x] flag validation for sortBy and maximum and minimum file sizes
 - [ ] interactive and/or non-interactive confirmation before real deletion
+- [ ] user can specify just a lower limit or upper limit (BUG)

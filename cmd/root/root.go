@@ -2,6 +2,7 @@ package root
 
 import (
 	"context"
+	"log"
 	"os"
 	"strings"
 
@@ -9,20 +10,16 @@ import (
 
 	"github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
 	"github.com/bilalcaliskan/s3-cleaner/cmd/start"
-	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
 	"github.com/bilalcaliskan/s3-cleaner/internal/version"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 var (
-	logger *zap.Logger
-	opts   *options.RootOptions
-	ver    = version.Get()
+	opts *options.RootOptions
+	ver  = version.Get()
 )
 
 func init() {
-	logger = logging.GetLogger()
 	opts = options.GetRootOptions()
 	options.InitFlags(rootCmd, opts)
 
@@ -41,17 +38,8 @@ var rootCmd = &cobra.Command{
 			banner.Init(os.Stdout, true, false, strings.NewReader(string(bannerBytes)))
 		}
 
-		if opts.VerboseLog {
-			logging.Atomic.SetLevel(zap.DebugLevel)
-		}
-
-		logger.Info("s3-cleaner is started",
-			zap.String("appVersion", ver.GitVersion),
-			zap.String("goVersion", ver.GoVersion),
-			zap.String("goOS", ver.GoOs),
-			zap.String("goArch", ver.GoArch),
-			zap.String("gitCommit", ver.GitCommit),
-			zap.String("buildDate", ver.BuildDate))
+		log.Printf("s3-cleaner is started appVersion=%s goVersion=%s goOS=%s goArch=%s gitCommit=%s buildDate=%s",
+			ver.GitVersion, ver.GoVersion, ver.GoOs, ver.GoArch, ver.GitCommit, ver.BuildDate)
 
 		cmd.SetContext(context.WithValue(context.Background(), options.CtxKey{}, opts))
 
@@ -60,7 +48,6 @@ var rootCmd = &cobra.Command{
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
