@@ -3,7 +3,6 @@ package aws
 import (
 	"log"
 
-	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
 	"github.com/rs/zerolog"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,12 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
 )
-
-var logger zerolog.Logger
-
-func init() {
-	logger = logging.GetLogger()
-}
 
 // CreateSession initializes session with provided credentials
 func CreateSession(opts *options.RootOptions) (*session.Session, error) {
@@ -30,6 +23,7 @@ func CreateSession(opts *options.RootOptions) (*session.Session, error) {
 	return sess, err
 }
 
+// GetAllFiles gets all of the files in the target bucket as the function name indicates
 func GetAllFiles(svc s3iface.S3API, opts *options.RootOptions) (*s3.ListObjectsOutput, error) {
 	var err error
 	var res *s3.ListObjectsOutput
@@ -43,18 +37,14 @@ func GetAllFiles(svc s3iface.S3API, opts *options.RootOptions) (*s3.ListObjectsO
 		return res, err
 	}
 
-	//for _, v := range res.Contents {
-	//	logger.Info(*v.Key)
-	//}
-
 	return res, nil
 }
 
-func DeleteFiles(svc s3iface.S3API, bucketName string, slice []*s3.Object, dryRun bool) error {
+// DeleteFiles deletes the slice of []*s3.Object objects in the target bucket
+func DeleteFiles(svc s3iface.S3API, bucketName string, slice []*s3.Object, dryRun bool, logger zerolog.Logger) error {
 	for _, v := range slice {
-		logger.Info().Str("key", *v.Key).Time("lastModifiedDate", *v.LastModified).
+		logger.Debug().Str("key", *v.Key).Time("lastModifiedDate", *v.LastModified).
 			Float64("size", float64(*v.Size)/1000000).Msg("will try to delete file")
-		//logger.Debug(fmt.Sprintf("will try to delete file %s with last modification date %v and size %f MB", *v.Key, *v.LastModified, float64(*v.Size)/1000000))
 
 		if !dryRun {
 			_, err := svc.DeleteObject(&s3.DeleteObjectInput{

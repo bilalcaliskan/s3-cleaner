@@ -8,5 +8,8 @@
 - [x] flag validation for sortBy and maximum and minimum file sizes
 - [x] interactive and/or non-interactive confirmation before real deletion
 - [ ] user can specify just a lower limit or upper limit (BUG)
+- [ ] move business flow in cmd package into internal package
 - [ ] unit testing CMD package
 - [ ] what happens if we use that tool on `versioning enabled` buckets?
+- [ ] refactoring
+- [ ] debug level logging

@@ -23,9 +23,9 @@ func GetStartOptions() *StartOptions {
 }
 
 func InitFlags(cmd *cobra.Command, opts *StartOptions) {
-	cmd.Flags().Int64VarP(&opts.MinFileSizeInMb, "minFileSizeInMb", "", 10,
+	cmd.Flags().Int64VarP(&opts.MinFileSizeInMb, "minFileSizeInMb", "", 0,
 		"minimum size in mb to clean from target bucket, 0 means no lower limit")
-	cmd.Flags().Int64VarP(&opts.MaxFileSizeInMb, "maxFileSizeInMb", "", 15,
+	cmd.Flags().Int64VarP(&opts.MaxFileSizeInMb, "maxFileSizeInMb", "", 0,
 		"maximum size in mb to clean from target bucket, 0 means no upper limit")
 	cmd.Flags().StringVarP(&opts.FileExtensions, "fileExtensions", "", "",
 		"selects the files with defined extensions to clean from target bucket, \"\" means all files (default \"\")")

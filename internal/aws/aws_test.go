@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
@@ -29,6 +31,7 @@ var (
 		RequestCharged: nil,
 		VersionId:      nil,
 	}
+	mockLogger = logging.GetLogger()
 )
 
 type mockS3Client struct {
@@ -98,7 +101,7 @@ func TestDeleteFilesHappyPath(t *testing.T) {
 	m := &mockS3Client{}
 	deleteObjectErr = nil
 
-	err := DeleteFiles(m, "dummy bucket", input, false)
+	err := DeleteFiles(m, "dummy bucket", input, false, mockLogger)
 	assert.Nil(t, err)
 }
 
@@ -107,7 +110,7 @@ func TestDeleteFilesHappyPathDryRun(t *testing.T) {
 	m := &mockS3Client{}
 	deleteObjectErr = nil
 
-	err := DeleteFiles(m, "dummy bucket", input, true)
+	err := DeleteFiles(m, "dummy bucket", input, true, mockLogger)
 	assert.Nil(t, err)
 }
 
@@ -120,7 +123,7 @@ func TestDeleteFilesFailedDeleteObjectCall(t *testing.T) {
 
 	m := &mockS3Client{}
 	deleteObjectErr = errors.New("dummy error")
-	err := DeleteFiles(m, "dummy bucket", input, false)
+	err := DeleteFiles(m, "dummy bucket", input, false, mockLogger)
 	assert.NotNil(t, err)
 	deleteObjectErr = nil
 }

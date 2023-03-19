@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	rootopts "github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
@@ -70,7 +71,18 @@ var (
 
 			var res []*s3.Object
 			for _, v := range allFiles.Contents {
-				if *v.Size >= startOpts.MinFileSizeInMb*1000000 && *v.Size < startOpts.MaxFileSizeInMb*1000000 {
+				if strings.HasSuffix(*v.Key, "/") {
+					logger.Debug().Str("key", *v.Key).Msg("object has directory suffix, skipping that one")
+					continue
+				}
+
+				if (startOpts.MinFileSizeInMb == 0 && startOpts.MaxFileSizeInMb != 0) && *v.Size < startOpts.MaxFileSizeInMb*1000000 { // case 2
+					res = append(res, v)
+				} else if (startOpts.MinFileSizeInMb != 0 && startOpts.MaxFileSizeInMb == 0) && *v.Size >= startOpts.MinFileSizeInMb*1000000 { // case 3
+					res = append(res, v)
+				} else if startOpts.MinFileSizeInMb == 0 && startOpts.MaxFileSizeInMb == 0 { // case 1
+					res = append(res, v)
+				} else if startOpts.MinFileSizeInMb != 0 && startOpts.MaxFileSizeInMb != 0 && (*v.Size >= startOpts.MinFileSizeInMb*1000000 && *v.Size < startOpts.MaxFileSizeInMb*1000000) { // case 4
 					res = append(res, v)
 				}
 			}
@@ -92,12 +104,9 @@ var (
 				return nil
 			}
 
-			fmt.Println(res)
 			keys := utils.GetKeysOnly(res)
-			//var builder strings.Builder
 			var buffer bytes.Buffer
 			for _, v := range keys {
-				//builder.WriteString(fmt.Sprintf("%s\n", v))
 				buffer.WriteString(v)
 			}
 
@@ -121,7 +130,16 @@ var (
 				}
 			}
 
-			if err := aws.DeleteFiles(svc, rootOpts.BucketName, res[:len(res)-startOpts.KeepLastNFiles], startOpts.DryRun); err != nil {
+			targetObjects := res[:len(res)-startOpts.KeepLastNFiles]
+			if len(targetObjects) == 0 {
+				logger.Info().Str("bucket", rootOpts.BucketName).Str("region", rootOpts.Region).
+					Msg("no deletable file found on the target bucket")
+				return nil
+			}
+
+			logger.Info().Any("files", keys).Msg("trying to delete files")
+
+			if err := aws.DeleteFiles(svc, rootOpts.BucketName, targetObjects, startOpts.DryRun, logger); err != nil {
 				logger.Error().Str("error", err.Error()).Msg("an error occurred while deleting target files")
 				return err
 			}

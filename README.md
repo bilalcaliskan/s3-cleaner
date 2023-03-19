@@ -56,6 +56,7 @@ Global Flags:
       --fileNamePrefix string   folder name of target bucket objects, means it can be used for folder-based object grouping buckets (default "")
       --region string           region of the target bucket on S3 (default "")
       --secretKey string        secret key credential to access S3 bucket (default "")
+  -v, --verbose                 verbose output of the logging library (default false)
 ```
 
 ## Development
