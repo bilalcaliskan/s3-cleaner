@@ -10,7 +10,7 @@
 - [x] debug level logging
 - [x] user can specify just a lower limit or upper limit (FIXED BUT NEEDS MORE TESTING)
 - [x] move business flow in cmd package into internal package
-- [ ] refactoring unit tests
+- [ ] refactoring unit tests (increase & fix duplicated code problem on mock structs on aws and cleaner packages)
 - [ ] refactoring business flow
 - [ ] unit testing CMD package
 - [ ] what happens if we use that tool on `versioning enabled` buckets?
