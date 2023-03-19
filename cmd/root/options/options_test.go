@@ -12,8 +12,15 @@ func TestGetRootOptions(t *testing.T) {
 	assert.NotNil(t, opts)
 }
 
-func TestInitFlags(t *testing.T) {
+func TestRootOptions_InitFlags(t *testing.T) {
 	cmd := cobra.Command{}
 	opts := GetRootOptions()
-	InitFlags(&cmd, opts)
+	opts.InitFlags(&cmd)
+}
+
+func TestRootOptions_SetAccessCredentialsFromEnv(t *testing.T) {
+	cmd := cobra.Command{}
+	opts := GetRootOptions()
+	err := opts.SetAccessCredentialsFromEnv(&cmd)
+	assert.Nil(t, err)
 }

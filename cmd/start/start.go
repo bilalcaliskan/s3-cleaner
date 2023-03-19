@@ -104,7 +104,8 @@ var (
 				return nil
 			}
 
-			keys := utils.GetKeysOnly(res)
+			targetObjects := res[:len(res)-startOpts.KeepLastNFiles]
+			keys := utils.GetKeysOnly(targetObjects)
 			var buffer bytes.Buffer
 			for _, v := range keys {
 				buffer.WriteString(v)
@@ -130,7 +131,6 @@ var (
 				}
 			}
 
-			targetObjects := res[:len(res)-startOpts.KeepLastNFiles]
 			if len(targetObjects) == 0 {
 				logger.Info().Str("bucket", rootOpts.BucketName).Str("region", rootOpts.Region).
 					Msg("no deletable file found on the target bucket")
