@@ -6,19 +6,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
 	listObjectsErr           error
-	getObjectErr             error
-	deleteObjectErr          error
+	getObjectsErr            error
+	deleteObjectsErr         error
 	defaultListObjectsOutput = &s3.ListObjectsOutput{
 		Name:        aws.String(""),
 		Marker:      aws.String(""),
@@ -56,11 +56,11 @@ func (m *mockS3Client) GetObject(input *s3.GetObjectInput) (*s3.GetObjectOutput,
 		ContentLength: aws.Int64(1000),
 		ContentType:   aws.String("text/plain"),
 		ETag:          aws.String("d73a503d212d9279e6b2ed8ac6bb81f3"),
-	}, getObjectErr
+	}, getObjectsErr
 }
 
 func (m *mockS3Client) DeleteObject(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error) {
-	return defaultDeleteObjectOutput, deleteObjectErr
+	return defaultDeleteObjectOutput, deleteObjectsErr
 }
 
 func TestGetAllFilesHappyPath(t *testing.T) {
@@ -99,7 +99,7 @@ func TestGetAllFilesFailedListObjectsCall(t *testing.T) {
 func TestDeleteFilesHappyPath(t *testing.T) {
 	var input []*s3.Object
 	m := &mockS3Client{}
-	deleteObjectErr = nil
+	deleteObjectsErr = nil
 
 	err := DeleteFiles(m, "dummy bucket", input, false, mockLogger)
 	assert.Nil(t, err)
@@ -108,7 +108,7 @@ func TestDeleteFilesHappyPath(t *testing.T) {
 func TestDeleteFilesHappyPathDryRun(t *testing.T) {
 	var input []*s3.Object
 	m := &mockS3Client{}
-	deleteObjectErr = nil
+	deleteObjectsErr = nil
 
 	err := DeleteFiles(m, "dummy bucket", input, true, mockLogger)
 	assert.Nil(t, err)
@@ -122,10 +122,10 @@ func TestDeleteFilesFailedDeleteObjectCall(t *testing.T) {
 	}
 
 	m := &mockS3Client{}
-	deleteObjectErr = errors.New("dummy error")
+	deleteObjectsErr = errors.New("dummy error")
 	err := DeleteFiles(m, "dummy bucket", input, false, mockLogger)
 	assert.NotNil(t, err)
-	deleteObjectErr = nil
+	deleteObjectsErr = nil
 }
 
 func TestCreateSession(t *testing.T) {
