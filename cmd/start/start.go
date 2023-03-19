@@ -1,16 +1,18 @@
 package start
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"sort"
-
-	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	rootopts "github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
 	"github.com/bilalcaliskan/s3-cleaner/cmd/start/options"
 	"github.com/bilalcaliskan/s3-cleaner/internal/aws"
+	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
 	"github.com/bilalcaliskan/s3-cleaner/internal/utils"
+	"github.com/manifoldco/promptui"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -88,6 +90,35 @@ var (
 				logger.Warn().Str("bucket", rootOpts.BucketName).Str("region", rootOpts.Region).Msg("no " +
 					"file found with specified specs on target bucket")
 				return nil
+			}
+
+			fmt.Println(res)
+			keys := utils.GetKeysOnly(res)
+			//var builder strings.Builder
+			var buffer bytes.Buffer
+			for _, v := range keys {
+				//builder.WriteString(fmt.Sprintf("%s\n", v))
+				buffer.WriteString(v)
+			}
+
+			if !startOpts.AutoApprove {
+				logger.Info().Any("files", keys).Msg("these files will be removed if you approve:")
+
+				prompt := promptui.Prompt{
+					Label:     "Delete Files?",
+					IsConfirm: true,
+					Validate: func(s string) error {
+						if len(s) == 1 {
+							return nil
+						}
+
+						return errors.New("invalid input")
+					},
+				}
+
+				if _, err := prompt.Run(); err != nil {
+					return err
+				}
 			}
 
 			if err := aws.DeleteFiles(svc, rootOpts.BucketName, res[:len(res)-startOpts.KeepLastNFiles], startOpts.DryRun); err != nil {

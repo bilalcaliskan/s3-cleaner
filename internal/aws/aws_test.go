@@ -13,21 +13,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var listObjectsErr error
-var getObjectErr error
-var deleteObjectErr error
-var defaultListObjectsOutput = &s3.ListObjectsOutput{
-	Name:        aws.String(""),
-	Marker:      aws.String(""),
-	MaxKeys:     aws.Int64(1000),
-	Prefix:      aws.String(""),
-	IsTruncated: aws.Bool(false),
-}
-var defaultDeleteObjectOutput = &s3.DeleteObjectOutput{
-	DeleteMarker:   nil,
-	RequestCharged: nil,
-	VersionId:      nil,
-}
+var (
+	listObjectsErr           error
+	getObjectErr             error
+	deleteObjectErr          error
+	defaultListObjectsOutput = &s3.ListObjectsOutput{
+		Name:        aws.String(""),
+		Marker:      aws.String(""),
+		MaxKeys:     aws.Int64(1000),
+		Prefix:      aws.String(""),
+		IsTruncated: aws.Bool(false),
+	}
+	defaultDeleteObjectOutput = &s3.DeleteObjectOutput{
+		DeleteMarker:   nil,
+		RequestCharged: nil,
+		VersionId:      nil,
+	}
+)
 
 type mockS3Client struct {
 	s3iface.S3API
@@ -95,6 +97,16 @@ func TestDeleteFilesHappyPath(t *testing.T) {
 	var input []*s3.Object
 	m := &mockS3Client{}
 	deleteObjectErr = nil
+
+	err := DeleteFiles(m, "dummy bucket", input, false)
+	assert.Nil(t, err)
+}
+
+func TestDeleteFilesHappyPathDryRun(t *testing.T) {
+	var input []*s3.Object
+	m := &mockS3Client{}
+	deleteObjectErr = nil
+
 	err := DeleteFiles(m, "dummy bucket", input, true)
 	assert.Nil(t, err)
 }
@@ -111,4 +123,10 @@ func TestDeleteFilesFailedDeleteObjectCall(t *testing.T) {
 	err := DeleteFiles(m, "dummy bucket", input, false)
 	assert.NotNil(t, err)
 	deleteObjectErr = nil
+}
+
+func TestCreateSession(t *testing.T) {
+	sess, err := CreateSession(options.GetRootOptions())
+	assert.Nil(t, err)
+	assert.NotNil(t, sess)
 }
