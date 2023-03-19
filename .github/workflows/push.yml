@@ -71,6 +71,10 @@ jobs:
 
   codeql:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     needs:
       - lint
       - fmt
@@ -90,6 +94,8 @@ jobs:
         uses: github/codeql-action/autobuild@v2
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{matrix.language}}"
 
   sonarcloud:
     runs-on: ubuntu-latest
