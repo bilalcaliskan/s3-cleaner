@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
@@ -13,21 +15,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var listObjectsErr error
-var getObjectErr error
-var deleteObjectErr error
-var defaultListObjectsOutput = &s3.ListObjectsOutput{
-	Name:        aws.String(""),
-	Marker:      aws.String(""),
-	MaxKeys:     aws.Int64(1000),
-	Prefix:      aws.String(""),
-	IsTruncated: aws.Bool(false),
-}
-var defaultDeleteObjectOutput = &s3.DeleteObjectOutput{
-	DeleteMarker:   nil,
-	RequestCharged: nil,
-	VersionId:      nil,
-}
+var (
+	listObjectsErr           error
+	getObjectErr             error
+	deleteObjectErr          error
+	defaultListObjectsOutput = &s3.ListObjectsOutput{
+		Name:        aws.String(""),
+		Marker:      aws.String(""),
+		MaxKeys:     aws.Int64(1000),
+		Prefix:      aws.String(""),
+		IsTruncated: aws.Bool(false),
+	}
+	defaultDeleteObjectOutput = &s3.DeleteObjectOutput{
+		DeleteMarker:   nil,
+		RequestCharged: nil,
+		VersionId:      nil,
+	}
+	mockLogger = logging.GetLogger()
+)
 
 type mockS3Client struct {
 	s3iface.S3API
@@ -95,7 +100,17 @@ func TestDeleteFilesHappyPath(t *testing.T) {
 	var input []*s3.Object
 	m := &mockS3Client{}
 	deleteObjectErr = nil
-	err := DeleteFiles(m, "dummy bucket", input, true)
+
+	err := DeleteFiles(m, "dummy bucket", input, false, mockLogger)
+	assert.Nil(t, err)
+}
+
+func TestDeleteFilesHappyPathDryRun(t *testing.T) {
+	var input []*s3.Object
+	m := &mockS3Client{}
+	deleteObjectErr = nil
+
+	err := DeleteFiles(m, "dummy bucket", input, true, mockLogger)
 	assert.Nil(t, err)
 }
 
@@ -108,7 +123,13 @@ func TestDeleteFilesFailedDeleteObjectCall(t *testing.T) {
 
 	m := &mockS3Client{}
 	deleteObjectErr = errors.New("dummy error")
-	err := DeleteFiles(m, "dummy bucket", input, false)
+	err := DeleteFiles(m, "dummy bucket", input, false, mockLogger)
 	assert.NotNil(t, err)
 	deleteObjectErr = nil
+}
+
+func TestCreateSession(t *testing.T) {
+	sess, err := CreateSession(options.GetRootOptions())
+	assert.Nil(t, err)
+	assert.NotNil(t, sess)
 }

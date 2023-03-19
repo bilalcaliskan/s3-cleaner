@@ -2,6 +2,7 @@ package root
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 
@@ -37,6 +38,11 @@ var rootCmd = &cobra.Command{
 		if _, err := os.Stat("build/ci/banner.txt"); err == nil {
 			bannerBytes, _ := os.ReadFile("build/ci/banner.txt")
 			banner.Init(os.Stdout, true, false, strings.NewReader(string(bannerBytes)))
+		}
+
+		fmt.Println(opts.VerboseLog)
+		if opts.VerboseLog {
+			logging.EnableDebugLogging()
 		}
 
 		logger := logging.GetLogger()

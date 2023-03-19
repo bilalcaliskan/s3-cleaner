@@ -21,6 +21,8 @@ type RootOptions struct {
 	FileNamePrefix string
 	// Region is the region of the target bucket
 	Region string
+	// VerboseLog is the verbosity of the logging library
+	VerboseLog bool
 }
 
 // GetRootOptions returns the pointer of S3CleanerOptions
@@ -39,6 +41,8 @@ func InitFlags(cmd *cobra.Command, opts *RootOptions) {
 		"secret key credential to access S3 bucket (default \"\")")
 	cmd.PersistentFlags().StringVarP(&opts.Region, "region", "", "",
 		"region of the target bucket on S3 (default \"\")")
+	cmd.PersistentFlags().BoolVarP(&opts.VerboseLog, "verbose", "", false,
+		"verbose output of the logging library (default false)")
 
 	_ = cmd.MarkFlagRequired("bucketName")
 	_ = cmd.MarkFlagRequired("accessKey")

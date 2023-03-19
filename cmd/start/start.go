@@ -1,16 +1,19 @@
 package start
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"sort"
-
-	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	rootopts "github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
 	"github.com/bilalcaliskan/s3-cleaner/cmd/start/options"
 	"github.com/bilalcaliskan/s3-cleaner/internal/aws"
+	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
 	"github.com/bilalcaliskan/s3-cleaner/internal/utils"
+	"github.com/manifoldco/promptui"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -68,7 +71,18 @@ var (
 
 			var res []*s3.Object
 			for _, v := range allFiles.Contents {
-				if *v.Size >= startOpts.MinFileSizeInMb*1000000 && *v.Size < startOpts.MaxFileSizeInMb*1000000 {
+				if strings.HasSuffix(*v.Key, "/") {
+					logger.Debug().Str("key", *v.Key).Msg("object has directory suffix, skipping that one")
+					continue
+				}
+
+				if (startOpts.MinFileSizeInMb == 0 && startOpts.MaxFileSizeInMb != 0) && *v.Size < startOpts.MaxFileSizeInMb*1000000 { // case 2
+					res = append(res, v)
+				} else if (startOpts.MinFileSizeInMb != 0 && startOpts.MaxFileSizeInMb == 0) && *v.Size >= startOpts.MinFileSizeInMb*1000000 { // case 3
+					res = append(res, v)
+				} else if startOpts.MinFileSizeInMb == 0 && startOpts.MaxFileSizeInMb == 0 { // case 1
+					res = append(res, v)
+				} else if startOpts.MinFileSizeInMb != 0 && startOpts.MaxFileSizeInMb != 0 && (*v.Size >= startOpts.MinFileSizeInMb*1000000 && *v.Size < startOpts.MaxFileSizeInMb*1000000) { // case 4
 					res = append(res, v)
 				}
 			}
@@ -90,7 +104,42 @@ var (
 				return nil
 			}
 
-			if err := aws.DeleteFiles(svc, rootOpts.BucketName, res[:len(res)-startOpts.KeepLastNFiles], startOpts.DryRun); err != nil {
+			keys := utils.GetKeysOnly(res)
+			var buffer bytes.Buffer
+			for _, v := range keys {
+				buffer.WriteString(v)
+			}
+
+			if !startOpts.AutoApprove {
+				logger.Info().Any("files", keys).Msg("these files will be removed if you approve:")
+
+				prompt := promptui.Prompt{
+					Label:     "Delete Files?",
+					IsConfirm: true,
+					Validate: func(s string) error {
+						if len(s) == 1 {
+							return nil
+						}
+
+						return errors.New("invalid input")
+					},
+				}
+
+				if _, err := prompt.Run(); err != nil {
+					return err
+				}
+			}
+
+			targetObjects := res[:len(res)-startOpts.KeepLastNFiles]
+			if len(targetObjects) == 0 {
+				logger.Info().Str("bucket", rootOpts.BucketName).Str("region", rootOpts.Region).
+					Msg("no deletable file found on the target bucket")
+				return nil
+			}
+
+			logger.Info().Any("files", keys).Msg("trying to delete files")
+
+			if err := aws.DeleteFiles(svc, rootOpts.BucketName, targetObjects, startOpts.DryRun, logger); err != nil {
 				logger.Error().Str("error", err.Error()).Msg("an error occurred while deleting target files")
 				return err
 			}

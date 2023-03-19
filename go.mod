@@ -5,12 +5,14 @@ go 1.20
 require (
 	github.com/aws/aws-sdk-go v1.44.220
 	github.com/dimiro1/banner v1.1.0
+	github.com/manifoldco/promptui v0.9.0
 	github.com/rs/zerolog v1.29.0
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.2
 )
 
 require (
+	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/common-nighthawk/go-figure v0.0.0-20200609044655-c4b36f998cf2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

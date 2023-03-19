@@ -13,6 +13,7 @@ type StartOptions struct {
 	FileExtensions  string
 	KeepLastNFiles  int
 	DryRun          bool
+	AutoApprove     bool
 	SortBy          string
 }
 
@@ -22,9 +23,9 @@ func GetStartOptions() *StartOptions {
 }
 
 func InitFlags(cmd *cobra.Command, opts *StartOptions) {
-	cmd.Flags().Int64VarP(&opts.MinFileSizeInMb, "minFileSizeInMb", "", 10,
+	cmd.Flags().Int64VarP(&opts.MinFileSizeInMb, "minFileSizeInMb", "", 0,
 		"minimum size in mb to clean from target bucket, 0 means no lower limit")
-	cmd.Flags().Int64VarP(&opts.MaxFileSizeInMb, "maxFileSizeInMb", "", 15,
+	cmd.Flags().Int64VarP(&opts.MaxFileSizeInMb, "maxFileSizeInMb", "", 0,
 		"maximum size in mb to clean from target bucket, 0 means no upper limit")
 	cmd.Flags().StringVarP(&opts.FileExtensions, "fileExtensions", "", "",
 		"selects the files with defined extensions to clean from target bucket, \"\" means all files (default \"\")")
@@ -32,6 +33,7 @@ func InitFlags(cmd *cobra.Command, opts *StartOptions) {
 		"defines how many of the files to skip deletion in specified criteria, 0 means clean them all")
 	cmd.Flags().StringVarP(&opts.SortBy, "sortBy", "", "lastModificationDate",
 		"defines the ascending order in the specified criteria, valid options are \"lastModificationDate\" and \"size\"")
+	cmd.Flags().BoolVarP(&opts.AutoApprove, "autoApprove", "", false, "Skip interactive approval (default false)")
 	cmd.Flags().BoolVarP(&opts.DryRun, "dryRun", "", false, "specifies that if you "+
 		"just want to see what to delete or completely delete them all (default false)")
 }

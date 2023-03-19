@@ -3,13 +3,13 @@
   - [x] sorting based on last modification time
   - [x] sorting based on size (may be additional option)
 - [x] partly unit testing
-- [ ] %85+ unit testing (WIP)
-- [ ] what happens if we use that tool on `versioning enabled` buckets?
-- [ ] different kind of cleaning strategies to clean bucket
-  - [x] bySize
-  - [ ] byExtension
-  - [ ] etc
+- [x] %85+ unit testing
 - [x] dry run
 - [x] flag validation for sortBy and maximum and minimum file sizes
-- [ ] interactive and/or non-interactive confirmation before real deletion
+- [x] interactive and/or non-interactive confirmation before real deletion
 - [ ] user can specify just a lower limit or upper limit (BUG)
+- [ ] move business flow in cmd package into internal package
+- [ ] unit testing CMD package
+- [ ] what happens if we use that tool on `versioning enabled` buckets?
+- [ ] refactoring
+- [ ] debug level logging
