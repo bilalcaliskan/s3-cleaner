@@ -3,6 +3,9 @@ package start
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/bilalcaliskan/s3-cleaner/internal/aws"
+
 	rootopts "github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
 	"github.com/bilalcaliskan/s3-cleaner/cmd/start/options"
 	"github.com/bilalcaliskan/s3-cleaner/internal/cleaner"
@@ -46,7 +49,18 @@ var (
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cleaner.StartCleaning(cmd.Context().Value(rootopts.OptsKey{}).(*rootopts.RootOptions), startOpts, logger)
+			rootOpts := cmd.Context().Value(rootopts.OptsKey{}).(*rootopts.RootOptions)
+			sess, err := aws.CreateSession(rootOpts)
+			if err != nil {
+				logger.Error().Str("error", err.Error()).Msg("an error occurred while creating session")
+				return err
+			}
+
+			svc := s3.New(sess)
+			logger.Info().Str("bucket", rootOpts.BucketName).Str("region", rootOpts.Region).Msg("trying " +
+				"to find files on target bucket")
+
+			return cleaner.StartCleaning(svc, rootOpts, startOpts, logger)
 		},
 	}
 )

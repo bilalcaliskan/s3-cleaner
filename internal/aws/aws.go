@@ -42,11 +42,6 @@ func GetAllFiles(svc s3iface.S3API, opts *options.RootOptions) (*s3.ListObjectsO
 
 // DeleteFiles deletes the slice of []*s3.Object objects in the target bucket
 func DeleteFiles(svc s3iface.S3API, bucketName string, slice []*s3.Object, dryRun bool, logger zerolog.Logger) error {
-	if dryRun {
-		logger.Info().Msg("skipping object deletion since --dryRun flag is passed")
-		return nil
-	}
-
 	for _, v := range slice {
 		logger.Debug().Str("key", *v.Key).Time("lastModifiedDate", *v.LastModified).
 			Float64("size", float64(*v.Size)/1000000).Msg("will try to delete file")

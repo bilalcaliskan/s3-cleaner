@@ -3,7 +3,8 @@ package cleaner
 import (
 	"bytes"
 
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3iface"
+
 	root "github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
 	start "github.com/bilalcaliskan/s3-cleaner/cmd/start/options"
 	"github.com/bilalcaliskan/s3-cleaner/internal/aws"
@@ -11,17 +12,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func StartCleaning(rootOpts *root.RootOptions, startOpts *start.StartOptions, logger zerolog.Logger) error {
-	sess, err := aws.CreateSession(rootOpts)
-	if err != nil {
-		logger.Error().Str("error", err.Error()).Msg("an error occurred while creating session")
-		return err
-	}
-
-	svc := s3.New(sess)
-	logger.Info().Str("bucket", rootOpts.BucketName).Str("region", rootOpts.Region).Msg("trying " +
-		"to find files on target bucket")
-
+func StartCleaning(svc s3iface.S3API, rootOpts *root.RootOptions, startOpts *start.StartOptions, logger zerolog.Logger) error {
 	allFiles, err := aws.GetAllFiles(svc, rootOpts)
 	if err != nil {
 		return err
@@ -41,6 +32,11 @@ func StartCleaning(rootOpts *root.RootOptions, startOpts *start.StartOptions, lo
 	var buffer bytes.Buffer
 	for _, v := range keys {
 		buffer.WriteString(v)
+	}
+
+	if startOpts.DryRun {
+		logger.Info().Msg("skipping object deletion since --dryRun flag is passed")
+		return nil
 	}
 
 	if err := promptDeletion(startOpts, logger, keys); err != nil {

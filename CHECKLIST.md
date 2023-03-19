@@ -9,7 +9,8 @@
 - [x] interactive and/or non-interactive confirmation before real deletion
 - [x] debug level logging
 - [x] user can specify just a lower limit or upper limit (FIXED BUT NEEDS MORE TESTING)
-- [ ] move business flow in cmd package into internal package
+- [x] move business flow in cmd package into internal package
+- [ ] refactoring unit tests
+- [ ] refactoring business flow
 - [ ] unit testing CMD package
 - [ ] what happens if we use that tool on `versioning enabled` buckets?
-- [ ] refactoring
