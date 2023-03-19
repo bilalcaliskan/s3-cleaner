@@ -1,6 +1,11 @@
 package options
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
 
 var rootOptions = &RootOptions{}
 
@@ -25,12 +30,7 @@ type RootOptions struct {
 	VerboseLog bool
 }
 
-// GetRootOptions returns the pointer of S3CleanerOptions
-func GetRootOptions() *RootOptions {
-	return rootOptions
-}
-
-func InitFlags(cmd *cobra.Command, opts *RootOptions) {
+func (opts *RootOptions) InitFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVarP(&opts.BucketName, "bucketName", "", "", "name of "+
 		"the target bucket on S3 (default \"\")")
 	cmd.PersistentFlags().StringVarP(&opts.FileNamePrefix, "fileNamePrefix", "", "",
@@ -43,9 +43,43 @@ func InitFlags(cmd *cobra.Command, opts *RootOptions) {
 		"region of the target bucket on S3 (default \"\")")
 	cmd.PersistentFlags().BoolVarP(&opts.VerboseLog, "verbose", "", false,
 		"verbose output of the logging library (default false)")
+}
 
-	_ = cmd.MarkFlagRequired("bucketName")
-	_ = cmd.MarkFlagRequired("accessKey")
-	_ = cmd.MarkFlagRequired("secretKey")
-	_ = cmd.MarkFlagRequired("region")
+func (opts *RootOptions) SetAccessCredentialsFromEnv(cmd *cobra.Command) error {
+	viper.AutomaticEnv()
+	viper.SetEnvPrefix("aws")
+	if err := viper.BindEnv("access_key", "secret_key", "bucket_name", "region"); err != nil {
+		return err
+	}
+
+	if accessKey := viper.Get("access_key"); accessKey != nil {
+		opts.AccessKey = fmt.Sprintf("%v", accessKey)
+	} else {
+		_ = cmd.MarkPersistentFlagRequired("accessKey")
+	}
+
+	if secretKey := viper.Get("secret_key"); secretKey != nil {
+		opts.SecretKey = fmt.Sprintf("%v", secretKey)
+	} else {
+		_ = cmd.MarkPersistentFlagRequired("secretKey")
+	}
+
+	if bucketName := viper.Get("bucket_name"); bucketName != nil {
+		opts.BucketName = fmt.Sprintf("%v", bucketName)
+	} else {
+		_ = cmd.MarkPersistentFlagRequired("bucketName")
+	}
+
+	if region := viper.Get("region"); region != nil {
+		opts.Region = fmt.Sprintf("%v", region)
+	} else {
+		_ = cmd.MarkPersistentFlagRequired("region")
+	}
+
+	return nil
+}
+
+// GetRootOptions returns the pointer of S3CleanerOptions
+func GetRootOptions() *RootOptions {
+	return rootOptions
 }

@@ -2,7 +2,6 @@ package root
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 
@@ -23,7 +22,10 @@ var (
 
 func init() {
 	opts = options.GetRootOptions()
-	options.InitFlags(rootCmd, opts)
+	opts.InitFlags(rootCmd)
+	if err := opts.SetAccessCredentialsFromEnv(rootCmd); err != nil {
+		panic(err)
+	}
 
 	rootCmd.AddCommand(start.StartCmd)
 }
@@ -40,7 +42,6 @@ var rootCmd = &cobra.Command{
 			banner.Init(os.Stdout, true, false, strings.NewReader(string(bannerBytes)))
 		}
 
-		fmt.Println(opts.VerboseLog)
 		if opts.VerboseLog {
 			logging.EnableDebugLogging()
 		}

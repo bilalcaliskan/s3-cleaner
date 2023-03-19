@@ -13,26 +13,13 @@
 
 It is a tool for finding desired files in a S3 bucket and cleans them with a rule set.
 
-## Installation
-
-### Binary
-Binary can be downloaded from [Releases](https://github.com/bilalcaliskan/s3-cleaner/releases) page.
-
-After then, you can simply run binary by providing required command line arguments:
-```shell
-$ ./s3-cleaner start --accessKey=xxxxx --secretKey=xxxxx --region=xxxxx --bucketName=xxxxx
+You can provide access credentials of your AWS account with below environment variables or CLI flags. Keep in mind that command line flags
+will override environment variables if you set both of them:
 ```
-
-### Homebrew
-This project can be installed with [Homebrew](https://brew.sh/):
-```shell
-$ brew tap bilalcaliskan/tap
-$ brew install bilalcaliskan/tap/s3-cleaner
-```
-
-Then similar to binary method, you can run it by calling below command:
-```shell
-$ s3-cleaner start --accessKey=xxxxx --secretKey=xxxxx --region=xxxxx --bucketName=xxxxx
+"--accessKey" CLI flag or "AWS_ACCESS_KEY" environment variable
+"--secretKey" CLI flag or "AWS_SECRET_KEY" environment variable
+"--region" CLI flag or "AWS_REGION" environment variable
+"--bucketName" CLI flag or "AWS_BUCKET_NAME" environment variable
 ```
 
 ## Configuration
@@ -57,6 +44,38 @@ Global Flags:
       --region string           region of the target bucket on S3 (default "")
       --secretKey string        secret key credential to access S3 bucket (default "")
   -v, --verbose                 verbose output of the logging library (default false)
+```
+
+## Installation
+
+### Binary
+Binary can be downloaded from [Releases](https://github.com/bilalcaliskan/s3-cleaner/releases) page.
+
+After then, you can simply run binary by providing required command line arguments:
+```shell
+$ ./s3-cleaner start --accessKey=xxxxx --secretKey=xxxxx --region=xxxxx --bucketName=xxxxx
+```
+
+or by providing environment variables for access credentials:
+```shell
+$ AWS_ACCESS_KEY=xxxxx AWS_SECRET_KEY=xxxxx AWS_REGION=xxxxx AWS_BUCKET_NAME=xxxxx ./s3-cleaner start
+```
+
+### Homebrew
+This project can be installed with [Homebrew](https://brew.sh/):
+```shell
+$ brew tap bilalcaliskan/tap
+$ brew install bilalcaliskan/tap/s3-cleaner
+```
+
+Then similar to binary method, you can run it by calling below command:
+```shell
+$ s3-cleaner start --accessKey=xxxxx --secretKey=xxxxx --region=xxxxx --bucketName=xxxxx
+```
+
+or by providing environment variables for access credentials:
+```shell
+$ AWS_ACCESS_KEY=xxxxx AWS_SECRET_KEY=xxxxx AWS_REGION=xxxxx AWS_BUCKET_NAME=xxxxx ./s3-cleaner start
 ```
 
 ## Development
