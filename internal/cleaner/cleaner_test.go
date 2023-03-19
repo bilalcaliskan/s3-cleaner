@@ -19,13 +19,36 @@ import (
 var (
 	listObjectsErr           error
 	getObjectsErr            error
-	deleteObjectsErr         error
+	deleteObjectErr          error
 	defaultListObjectsOutput = &s3.ListObjectsOutput{
 		Name:        aws.String(""),
 		Marker:      aws.String(""),
 		MaxKeys:     aws.Int64(1000),
 		Prefix:      aws.String(""),
 		IsTruncated: aws.Bool(false),
+		Contents: []*s3.Object{
+			{
+				ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5449d"),
+				Key:          aws.String("file1.txt"),
+				StorageClass: aws.String("STANDARD"),
+				Size:         aws.Int64(1000),
+				LastModified: aws.Time(time.Now()),
+			},
+			{
+				ETag:         aws.String("03c0fe42b7efa3470fc99037a8e54122"),
+				Key:          aws.String("file2.txt"),
+				StorageClass: aws.String("STANDARD"),
+				Size:         aws.Int64(2000),
+				LastModified: aws.Time(time.Now()),
+			},
+			{
+				ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5443d"),
+				Key:          aws.String("file3.txt"),
+				StorageClass: aws.String("STANDARD"),
+				Size:         aws.Int64(3000),
+				LastModified: aws.Time(time.Now()),
+			},
+		},
 	}
 	defaultDeleteObjectOutput = &s3.DeleteObjectOutput{
 		DeleteMarker:   nil,
@@ -61,73 +84,32 @@ func (m *mockS3Client) GetObject(input *s3.GetObjectInput) (*s3.GetObjectOutput,
 }
 
 func (m *mockS3Client) DeleteObject(input *s3.DeleteObjectInput) (*s3.DeleteObjectOutput, error) {
-	return defaultDeleteObjectOutput, deleteObjectsErr
+	return defaultDeleteObjectOutput, deleteObjectErr
 }
 
 func TestStartCleaning(t *testing.T) {
 	m := &mockS3Client{}
-	defaultListObjectsOutput.Contents = []*s3.Object{
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5449d"),
-			Key:          aws.String("../../mock/file1.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(1000),
-			LastModified: aws.Time(time.Now()),
-		},
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e54122"),
-			Key:          aws.String("../../mock/file2.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(2000),
-			LastModified: aws.Time(time.Now()),
-		},
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5443d"),
-			Key:          aws.String("../../mock/file3.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(3000),
-			LastModified: aws.Time(time.Now()),
-		},
-	}
 
-	listObjectsErr = nil
 	startOpts := options2.GetStartOptions()
 	startOpts.DryRun = false
 	startOpts.AutoApprove = true
 	err := StartCleaning(m, options.GetRootOptions(), startOpts, mockLogger)
 	assert.Nil(t, err)
+
+	// reset zero values again
+	startOpts.DryRun = false
+	startOpts.AutoApprove = false
 }
 
 func TestStartCleaningDryRun(t *testing.T) {
 	m := &mockS3Client{}
-	defaultListObjectsOutput.Contents = []*s3.Object{
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5449d"),
-			Key:          aws.String("../../mock/file1.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(1000),
-			LastModified: aws.Time(time.Now()),
-		},
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e54122"),
-			Key:          aws.String("../../mock/file2.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(2000),
-			LastModified: aws.Time(time.Now()),
-		},
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5443d"),
-			Key:          aws.String("../../mock/file3.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(3000),
-			LastModified: aws.Time(time.Now()),
-		},
-	}
 
 	listObjectsErr = nil
 	startOpts := options2.GetStartOptions()
 	startOpts.DryRun = true
 	startOpts.AutoApprove = true
+	startOpts.MinFileSizeInMb = 0
+	startOpts.MaxFileSizeInMb = 0
 	err := StartCleaning(m, options.GetRootOptions(), startOpts, mockLogger)
 	assert.Nil(t, err)
 
@@ -135,44 +117,11 @@ func TestStartCleaningDryRun(t *testing.T) {
 	listObjectsErr = nil
 	startOpts.DryRun = false
 	startOpts.AutoApprove = false
-	defaultListObjectsOutput = &s3.ListObjectsOutput{
-		Name:        aws.String(""),
-		Marker:      aws.String(""),
-		MaxKeys:     aws.Int64(1000),
-		Prefix:      aws.String(""),
-		IsTruncated: aws.Bool(false),
-	}
-	startOpts.MinFileSizeInMb = 0
-	startOpts.MaxFileSizeInMb = 0
 }
 
 func TestStartCleaningDryRun1(t *testing.T) {
 	m := &mockS3Client{}
-	defaultListObjectsOutput.Contents = []*s3.Object{
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5449d"),
-			Key:          aws.String("../../mock/file1.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(1000),
-			LastModified: aws.Time(time.Now()),
-		},
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e54122"),
-			Key:          aws.String("../../mock/file2.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(2000),
-			LastModified: aws.Time(time.Now()),
-		},
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5443d"),
-			Key:          aws.String("../../mock/file3.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(3000),
-			LastModified: aws.Time(time.Now()),
-		},
-	}
 
-	listObjectsErr = nil
 	startOpts := options2.GetStartOptions()
 	startOpts.DryRun = true
 	startOpts.AutoApprove = true
@@ -182,45 +131,14 @@ func TestStartCleaningDryRun1(t *testing.T) {
 	assert.Nil(t, err)
 
 	// reset zero values again
-	listObjectsErr = nil
 	startOpts.DryRun = false
 	startOpts.AutoApprove = false
-	defaultListObjectsOutput = &s3.ListObjectsOutput{
-		Name:        aws.String(""),
-		Marker:      aws.String(""),
-		MaxKeys:     aws.Int64(1000),
-		Prefix:      aws.String(""),
-		IsTruncated: aws.Bool(false),
-	}
 	startOpts.MinFileSizeInMb = 0
 	startOpts.MaxFileSizeInMb = 0
 }
 
 func TestStartCleaningDryRun2(t *testing.T) {
 	m := &mockS3Client{}
-	defaultListObjectsOutput.Contents = []*s3.Object{
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5449d"),
-			Key:          aws.String("../../mock/file1.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(1000),
-			LastModified: aws.Time(time.Now()),
-		},
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e54122"),
-			Key:          aws.String("../../mock/file2.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(2000),
-			LastModified: aws.Time(time.Now()),
-		},
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5443d"),
-			Key:          aws.String("../../mock/file3.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(3000),
-			LastModified: aws.Time(time.Now()),
-		},
-	}
 
 	listObjectsErr = nil
 	startOpts := options2.GetStartOptions()
@@ -228,6 +146,7 @@ func TestStartCleaningDryRun2(t *testing.T) {
 	startOpts.AutoApprove = true
 	startOpts.MinFileSizeInMb = 10
 	startOpts.MaxFileSizeInMb = 0
+
 	err := StartCleaning(m, options.GetRootOptions(), startOpts, mockLogger)
 	assert.Nil(t, err)
 
@@ -235,42 +154,12 @@ func TestStartCleaningDryRun2(t *testing.T) {
 	listObjectsErr = nil
 	startOpts.DryRun = false
 	startOpts.AutoApprove = false
-	defaultListObjectsOutput = &s3.ListObjectsOutput{
-		Name:        aws.String(""),
-		Marker:      aws.String(""),
-		MaxKeys:     aws.Int64(1000),
-		Prefix:      aws.String(""),
-		IsTruncated: aws.Bool(false),
-	}
 	startOpts.MinFileSizeInMb = 0
 	startOpts.MaxFileSizeInMb = 0
 }
 
 func TestStartCleaningListError(t *testing.T) {
 	m := &mockS3Client{}
-	defaultListObjectsOutput.Contents = []*s3.Object{
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5449d"),
-			Key:          aws.String("../../mock/file1.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(1000),
-			LastModified: aws.Time(time.Now()),
-		},
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e54122"),
-			Key:          aws.String("../../mock/file2.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(2000),
-			LastModified: aws.Time(time.Now()),
-		},
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5443d"),
-			Key:          aws.String("../../mock/file3.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(3000),
-			LastModified: aws.Time(time.Now()),
-		},
-	}
 
 	listObjectsErr = errors.New("dummy list error")
 	startOpts := options2.GetStartOptions()
@@ -283,42 +172,12 @@ func TestStartCleaningListError(t *testing.T) {
 	listObjectsErr = nil
 	startOpts.DryRun = false
 	startOpts.AutoApprove = false
-	defaultListObjectsOutput = &s3.ListObjectsOutput{
-		Name:        aws.String(""),
-		Marker:      aws.String(""),
-		MaxKeys:     aws.Int64(1000),
-		Prefix:      aws.String(""),
-		IsTruncated: aws.Bool(false),
-	}
 }
 
 func TestStartCleaningDeleteError(t *testing.T) {
 	m := &mockS3Client{}
-	defaultListObjectsOutput.Contents = []*s3.Object{
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5449d"),
-			Key:          aws.String("file1.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(1000),
-			LastModified: aws.Time(time.Now()),
-		},
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e54122"),
-			Key:          aws.String("file2.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(2000),
-			LastModified: aws.Time(time.Now()),
-		},
-		{
-			ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5443d"),
-			Key:          aws.String("file3.txt"),
-			StorageClass: aws.String("STANDARD"),
-			Size:         aws.Int64(3000),
-			LastModified: aws.Time(time.Now()),
-		},
-	}
 
-	deleteObjectsErr = errors.New("dummy delete error")
+	deleteObjectErr = errors.New("dummy delete error")
 	startOpts := options2.GetStartOptions()
 	startOpts.DryRun = false
 	startOpts.AutoApprove = true
@@ -326,7 +185,7 @@ func TestStartCleaningDeleteError(t *testing.T) {
 	assert.NotNil(t, err)
 
 	// reset zero values again
-	deleteObjectsErr = nil
+	deleteObjectErr = nil
 	startOpts.DryRun = false
 	startOpts.AutoApprove = false
 }
