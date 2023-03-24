@@ -18,8 +18,7 @@ import (
 func init() {
 	logger = logging.GetLogger()
 	startOpts = options.GetStartOptions()
-
-	options.InitFlags(StartCmd, startOpts)
+	startOpts.InitFlags(StartCmd)
 }
 
 var (

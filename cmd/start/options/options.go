@@ -22,7 +22,7 @@ func GetStartOptions() *StartOptions {
 	return startOptions
 }
 
-func InitFlags(cmd *cobra.Command, opts *StartOptions) {
+func (opts *StartOptions) InitFlags(cmd *cobra.Command) {
 	cmd.Flags().Int64VarP(&opts.MinFileSizeInMb, "minFileSizeInMb", "", 0,
 		"minimum size in mb to clean from target bucket, 0 means no lower limit")
 	cmd.Flags().Int64VarP(&opts.MaxFileSizeInMb, "maxFileSizeInMb", "", 0,
