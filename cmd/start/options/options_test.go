@@ -15,5 +15,5 @@ func TestGetRootOptions(t *testing.T) {
 func TestInitFlags(t *testing.T) {
 	cmd := cobra.Command{}
 	opts := GetStartOptions()
-	InitFlags(&cmd, opts)
+	opts.InitFlags(&cmd)
 }
