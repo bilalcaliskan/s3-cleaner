@@ -20,6 +20,10 @@ func StartCleaning(svc s3iface.S3API, startOpts *start.StartOptions, logger zero
 	res := getProperObjects(startOpts, allFiles, logger)
 	sortObjects(res, startOpts)
 
+	//if startOpts.KeepLastNFiles > len(res) {
+	//
+	//}
+
 	targetObjects := res[:len(res)-startOpts.KeepLastNFiles]
 	if err := checkLength(targetObjects); err != nil {
 		logger.Warn().Str("bucket", startOpts.RootOptions.BucketName).Str("region", startOpts.RootOptions.Region).

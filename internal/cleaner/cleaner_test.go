@@ -98,6 +98,32 @@ func TestStartCleaning(t *testing.T) {
 	startOpts.SetZeroValues()
 }
 
+func TestStartCleaningSortBySize(t *testing.T) {
+	m := &mockS3Client{}
+
+	startOpts := options2.GetStartOptions()
+	startOpts.DryRun = false
+	startOpts.AutoApprove = true
+	startOpts.SortBy = "size"
+	err := StartCleaning(m, startOpts, mockLogger)
+	assert.Nil(t, err)
+
+	startOpts.SetZeroValues()
+}
+
+//func TestStartCleaningEmptyTargetObjects(t *testing.T) {
+//	m := &mockS3Client{}
+//
+//	startOpts := options2.GetStartOptions()
+//	startOpts.DryRun = false
+//	startOpts.AutoApprove = true
+//	startOpts.KeepLastNFiles = 100
+//	err := StartCleaning(m, startOpts, mockLogger)
+//	assert.Nil(t, err)
+//
+//	startOpts.SetZeroValues()
+//}
+
 func TestStartCleaningDryRunEqualMinMaxValues(t *testing.T) {
 	m := &mockS3Client{}
 
@@ -125,21 +151,6 @@ func TestStartCleaningDryRunNotEqualMinMaxValues(t *testing.T) {
 
 	startOpts.SetZeroValues()
 }
-
-//func TestStartCleaningDryRunWrongMinMaxValues(t *testing.T) {
-//	m := &mockS3Client{}
-//
-//	startOpts := options2.GetStartOptions()
-//	startOpts.DryRun = true
-//	startOpts.AutoApprove = true
-//	startOpts.MinFileSizeInMb = 10
-//	startOpts.MaxFileSizeInMb = 0
-//
-//	err := StartCleaning(m, startOpts, mockLogger)
-//	assert.Nil(t, err)
-//
-//	startOpts.SetZeroValues()
-//}
 
 func TestStartCleaningListError(t *testing.T) {
 	m := &mockS3Client{}

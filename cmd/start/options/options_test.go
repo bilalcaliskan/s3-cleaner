@@ -17,3 +17,8 @@ func TestInitFlags(t *testing.T) {
 	opts := GetStartOptions()
 	opts.InitFlags(&cmd)
 }
+
+func TestStartOptions_SetZeroValues(t *testing.T) {
+	opts := GetStartOptions()
+	opts.SetZeroValues()
+}
