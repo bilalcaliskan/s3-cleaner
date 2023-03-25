@@ -3,8 +3,6 @@ package options
 import (
 	"fmt"
 
-	"github.com/bilalcaliskan/s3-cleaner/cmd/start/options"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -29,8 +27,7 @@ type RootOptions struct {
 	// Region is the region of the target bucket
 	Region string
 	// VerboseLog is the verbosity of the logging library
-	VerboseLog   bool
-	StartOptions *options.StartOptions
+	VerboseLog bool
 }
 
 func (opts *RootOptions) InitFlags(cmd *cobra.Command) {

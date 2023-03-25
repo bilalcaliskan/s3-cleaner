@@ -58,7 +58,7 @@ func promptDeletion(startOpts *start.StartOptions, logger zerolog.Logger, keys [
 		logger.Info().Any("files", keys).Msg("these files will be removed if you approve:")
 
 		prompt := promptui.Prompt{
-			Label:     "Delete Files?",
+			Label:     "Delete Files? (y/N)",
 			IsConfirm: true,
 			Validate: func(s string) error {
 				if len(s) == 1 {

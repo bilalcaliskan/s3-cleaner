@@ -31,6 +31,8 @@ var (
 		Short: "start subcommand starts the app, finds and clears desired files",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			logger = cmd.Context().Value(rootopts.LoggerKey{}).(zerolog.Logger)
+			rootOpts := cmd.Context().Value(rootopts.OptsKey{}).(*rootopts.RootOptions)
+			startOpts.RootOptions = rootOpts
 
 			if startOpts.MinFileSizeInMb > startOpts.MaxFileSizeInMb && (startOpts.MinFileSizeInMb != 0 && startOpts.MaxFileSizeInMb != 0) {
 				err := fmt.Errorf("minFileSizeInMb should be lower than maxFileSizeInMb")
@@ -48,18 +50,18 @@ var (
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			rootOpts := cmd.Context().Value(rootopts.OptsKey{}).(*rootopts.RootOptions)
-			sess, err := aws.CreateSession(rootOpts)
+
+			sess, err := aws.CreateSession(startOpts.RootOptions)
 			if err != nil {
 				logger.Error().Str("error", err.Error()).Msg("an error occurred while creating session")
 				return err
 			}
 
 			svc := s3.New(sess)
-			logger.Info().Str("bucket", rootOpts.BucketName).Str("region", rootOpts.Region).Msg("trying " +
-				"to find files on target bucket")
+			logger.Info().Str("bucket", startOpts.RootOptions.BucketName).Str("region", startOpts.RootOptions.Region).
+				Msg("trying to find files on target bucket")
 
-			return cleaner.StartCleaning(svc, rootOpts, startOpts, logger)
+			return cleaner.StartCleaning(svc, startOpts, logger)
 		},
 	}
 )

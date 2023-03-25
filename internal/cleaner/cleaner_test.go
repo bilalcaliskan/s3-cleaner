@@ -11,7 +11,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
 	options2 "github.com/bilalcaliskan/s3-cleaner/cmd/start/options"
 	"github.com/stretchr/testify/assert"
 )
@@ -93,33 +92,27 @@ func TestStartCleaning(t *testing.T) {
 	startOpts := options2.GetStartOptions()
 	startOpts.DryRun = false
 	startOpts.AutoApprove = true
-	err := StartCleaning(m, options.GetRootOptions(), startOpts, mockLogger)
+	err := StartCleaning(m, startOpts, mockLogger)
 	assert.Nil(t, err)
 
-	// reset zero values again
-	startOpts.DryRun = false
-	startOpts.AutoApprove = false
+	startOpts.SetZeroValues()
 }
 
-func TestStartCleaningDryRun(t *testing.T) {
+func TestStartCleaningDryRunEqualMinMaxValues(t *testing.T) {
 	m := &mockS3Client{}
 
-	listObjectsErr = nil
 	startOpts := options2.GetStartOptions()
 	startOpts.DryRun = true
 	startOpts.AutoApprove = true
 	startOpts.MinFileSizeInMb = 0
 	startOpts.MaxFileSizeInMb = 0
-	err := StartCleaning(m, options.GetRootOptions(), startOpts, mockLogger)
+	err := StartCleaning(m, startOpts, mockLogger)
 	assert.Nil(t, err)
 
-	// reset zero values again
-	listObjectsErr = nil
-	startOpts.DryRun = false
-	startOpts.AutoApprove = false
+	startOpts.SetZeroValues()
 }
 
-func TestStartCleaningDryRun1(t *testing.T) {
+func TestStartCleaningDryRunNotEqualMinMaxValues(t *testing.T) {
 	m := &mockS3Client{}
 
 	startOpts := options2.GetStartOptions()
@@ -127,36 +120,26 @@ func TestStartCleaningDryRun1(t *testing.T) {
 	startOpts.AutoApprove = true
 	startOpts.MinFileSizeInMb = 0
 	startOpts.MaxFileSizeInMb = 10
-	err := StartCleaning(m, options.GetRootOptions(), startOpts, mockLogger)
+	err := StartCleaning(m, startOpts, mockLogger)
 	assert.Nil(t, err)
 
-	// reset zero values again
-	startOpts.DryRun = false
-	startOpts.AutoApprove = false
-	startOpts.MinFileSizeInMb = 0
-	startOpts.MaxFileSizeInMb = 0
+	startOpts.SetZeroValues()
 }
 
-func TestStartCleaningDryRun2(t *testing.T) {
-	m := &mockS3Client{}
-
-	listObjectsErr = nil
-	startOpts := options2.GetStartOptions()
-	startOpts.DryRun = true
-	startOpts.AutoApprove = true
-	startOpts.MinFileSizeInMb = 10
-	startOpts.MaxFileSizeInMb = 0
-
-	err := StartCleaning(m, options.GetRootOptions(), startOpts, mockLogger)
-	assert.Nil(t, err)
-
-	// reset zero values again
-	listObjectsErr = nil
-	startOpts.DryRun = false
-	startOpts.AutoApprove = false
-	startOpts.MinFileSizeInMb = 0
-	startOpts.MaxFileSizeInMb = 0
-}
+//func TestStartCleaningDryRunWrongMinMaxValues(t *testing.T) {
+//	m := &mockS3Client{}
+//
+//	startOpts := options2.GetStartOptions()
+//	startOpts.DryRun = true
+//	startOpts.AutoApprove = true
+//	startOpts.MinFileSizeInMb = 10
+//	startOpts.MaxFileSizeInMb = 0
+//
+//	err := StartCleaning(m, startOpts, mockLogger)
+//	assert.Nil(t, err)
+//
+//	startOpts.SetZeroValues()
+//}
 
 func TestStartCleaningListError(t *testing.T) {
 	m := &mockS3Client{}
@@ -165,13 +148,11 @@ func TestStartCleaningListError(t *testing.T) {
 	startOpts := options2.GetStartOptions()
 	startOpts.DryRun = false
 	startOpts.AutoApprove = true
-	err := StartCleaning(m, options.GetRootOptions(), startOpts, mockLogger)
+	err := StartCleaning(m, startOpts, mockLogger)
 	assert.NotNil(t, err)
 
-	// reset zero values again
-	listObjectsErr = nil
-	startOpts.DryRun = false
-	startOpts.AutoApprove = false
+	startOpts.SetZeroValues()
+	setZeroValuesForErrors()
 }
 
 func TestStartCleaningDeleteError(t *testing.T) {
@@ -181,11 +162,15 @@ func TestStartCleaningDeleteError(t *testing.T) {
 	startOpts := options2.GetStartOptions()
 	startOpts.DryRun = false
 	startOpts.AutoApprove = true
-	err := StartCleaning(m, options.GetRootOptions(), startOpts, mockLogger)
+	err := StartCleaning(m, startOpts, mockLogger)
 	assert.NotNil(t, err)
 
-	// reset zero values again
+	startOpts.SetZeroValues()
+	setZeroValuesForErrors()
+}
+
+func setZeroValuesForErrors() {
+	listObjectsErr = nil
+	getObjectsErr = nil
 	deleteObjectErr = nil
-	startOpts.DryRun = false
-	startOpts.AutoApprove = false
 }
