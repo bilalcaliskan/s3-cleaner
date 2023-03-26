@@ -9,14 +9,12 @@ import (
 	rootopts "github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
 	"github.com/bilalcaliskan/s3-cleaner/cmd/start/options"
 	"github.com/bilalcaliskan/s3-cleaner/internal/cleaner"
-	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
 	"github.com/bilalcaliskan/s3-cleaner/internal/utils"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	logger = logging.GetLogger()
 	startOpts = options.GetStartOptions()
 	startOpts.InitFlags(StartCmd)
 }
@@ -58,8 +56,7 @@ var (
 			}
 
 			svc := s3.New(sess)
-			logger.Info().Str("bucket", startOpts.RootOptions.BucketName).Str("region", startOpts.RootOptions.Region).
-				Msg("trying to find files on target bucket")
+			logger.Info().Msg("trying to find files on target bucket")
 
 			return cleaner.StartCleaning(svc, startOpts, logger)
 		},

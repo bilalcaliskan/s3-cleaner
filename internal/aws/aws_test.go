@@ -31,7 +31,7 @@ var (
 		RequestCharged: nil,
 		VersionId:      nil,
 	}
-	mockLogger = logging.GetLogger()
+	mockLogger = logging.GetLogger(options.GetRootOptions())
 )
 
 type mockS3Client struct {

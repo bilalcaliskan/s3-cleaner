@@ -12,21 +12,33 @@ import (
 )
 
 func getProperObjects(startOpts *start.StartOptions, allFiles *s3.ListObjectsOutput, logger zerolog.Logger) (res []*s3.Object) {
+	extensions := strings.Split(startOpts.FileExtensions, ",")
+
 	for _, v := range allFiles.Contents {
 		if strings.HasSuffix(*v.Key, "/") {
 			logger.Debug().Str("key", *v.Key).Msg("object has directory suffix, skipping that one")
 			continue
 		}
 
-		if (startOpts.MinFileSizeInMb == 0 && startOpts.MaxFileSizeInMb != 0) && *v.Size < startOpts.MaxFileSizeInMb*1000000 { // case 2
-			res = append(res, v)
-		} else if (startOpts.MinFileSizeInMb != 0 && startOpts.MaxFileSizeInMb == 0) && *v.Size >= startOpts.MinFileSizeInMb*1000000 { // case 3
-			res = append(res, v)
-		} else if startOpts.MinFileSizeInMb == 0 && startOpts.MaxFileSizeInMb == 0 { // case 1
-			res = append(res, v)
-		} else if startOpts.MinFileSizeInMb != 0 && startOpts.MaxFileSizeInMb != 0 && (*v.Size >= startOpts.MinFileSizeInMb*1000000 && *v.Size < startOpts.MaxFileSizeInMb*1000000) { // case 4
-			res = append(res, v)
+		if len(extensions) > 0 && !arrayContains(extensions, *v.Key) {
+			continue
 		}
+
+		res = makeDecisionBySize(startOpts, res, v)
+	}
+
+	return res
+}
+
+func makeDecisionBySize(startOpts *start.StartOptions, res []*s3.Object, object *s3.Object) []*s3.Object {
+	if (startOpts.MinFileSizeInMb == 0 && startOpts.MaxFileSizeInMb != 0) && *object.Size < startOpts.MaxFileSizeInMb*1000000 {
+		res = append(res, object)
+	} else if (startOpts.MinFileSizeInMb != 0 && startOpts.MaxFileSizeInMb == 0) && *object.Size >= startOpts.MinFileSizeInMb*1000000 {
+		res = append(res, object)
+	} else if startOpts.MinFileSizeInMb == 0 && startOpts.MaxFileSizeInMb == 0 {
+		res = append(res, object)
+	} else if startOpts.MinFileSizeInMb != 0 && startOpts.MaxFileSizeInMb != 0 && (*object.Size >= startOpts.MinFileSizeInMb*1000000 && *object.Size < startOpts.MaxFileSizeInMb*1000000) {
+		res = append(res, object)
 	}
 
 	return res
@@ -79,4 +91,14 @@ func promptDeletion(startOpts *start.StartOptions, logger zerolog.Logger, keys [
 	}
 
 	return nil
+}
+
+func arrayContains(sl []string, name string) bool {
+	for _, value := range sl {
+		if strings.Contains(name, value) {
+			return true
+		}
+	}
+
+	return false
 }

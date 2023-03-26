@@ -20,14 +20,18 @@ func StartCleaning(svc s3iface.S3API, startOpts *start.StartOptions, logger zero
 	res := getProperObjects(startOpts, allFiles, logger)
 	sortObjects(res, startOpts)
 
-	//if startOpts.KeepLastNFiles > len(res) {
-	//
-	//}
+	border := len(res) - startOpts.KeepLastNFiles
+	if border < 0 {
+		logger.Warn().
+			Int("arrayLength", len(res)).
+			Int("keepLastNFiles", startOpts.KeepLastNFiles).
+			Msg("not enough file, length of array is smaller than --keepLastNFiles flag")
+		return nil
+	}
 
 	targetObjects := res[:len(res)-startOpts.KeepLastNFiles]
 	if err := checkLength(targetObjects); err != nil {
-		logger.Warn().Str("bucket", startOpts.RootOptions.BucketName).Str("region", startOpts.RootOptions.Region).
-			Msg(err.Error())
+		logger.Warn().Msg(err.Error())
 		return nil
 	}
 
@@ -37,6 +41,7 @@ func StartCleaning(svc s3iface.S3API, startOpts *start.StartOptions, logger zero
 		buffer.WriteString(v)
 	}
 
+	logger.Info().Any("files", keys).Msg("will attempt to delete these files")
 	if startOpts.DryRun {
 		logger.Info().Msg("skipping object deletion since --dryRun flag is passed")
 		return nil
@@ -47,7 +52,6 @@ func StartCleaning(svc s3iface.S3API, startOpts *start.StartOptions, logger zero
 		return err
 	}
 
-	logger.Info().Any("files", keys).Msg("will attempt to delete these files")
 	if err := aws.DeleteFiles(svc, startOpts.RootOptions.BucketName, targetObjects, startOpts.DryRun, logger); err != nil {
 		logger.Error().Str("error", err.Error()).Msg("an error occurred while deleting target files")
 		return err

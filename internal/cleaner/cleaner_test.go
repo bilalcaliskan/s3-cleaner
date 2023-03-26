@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
+
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/bilalcaliskan/s3-cleaner/internal/logging"
 
@@ -54,7 +56,7 @@ var (
 		RequestCharged: nil,
 		VersionId:      nil,
 	}
-	mockLogger = logging.GetLogger()
+	mockLogger = logging.GetLogger(options.GetRootOptions())
 )
 
 type mockS3Client struct {
@@ -111,18 +113,21 @@ func TestStartCleaningSortBySize(t *testing.T) {
 	startOpts.SetZeroValues()
 }
 
-//func TestStartCleaningEmptyTargetObjects(t *testing.T) {
-//	m := &mockS3Client{}
-//
-//	startOpts := options2.GetStartOptions()
-//	startOpts.DryRun = false
-//	startOpts.AutoApprove = true
-//	startOpts.KeepLastNFiles = 100
-//	err := StartCleaning(m, startOpts, mockLogger)
-//	assert.Nil(t, err)
-//
-//	startOpts.SetZeroValues()
-//}
+func TestStartCleaningWrongBorder(t *testing.T) {
+	m := &mockS3Client{}
+
+	startOpts := options2.GetStartOptions()
+	startOpts.DryRun = true
+	startOpts.AutoApprove = true
+	startOpts.MinFileSizeInMb = 0
+	startOpts.MaxFileSizeInMb = 0
+	startOpts.KeepLastNFiles = 300
+	err := StartCleaning(m, startOpts, mockLogger)
+	// normally we would expect err not to be nil but we are ignoring the error in that case
+	assert.Nil(t, err)
+
+	startOpts.SetZeroValues()
+}
 
 func TestStartCleaningDryRunEqualMinMaxValues(t *testing.T) {
 	m := &mockS3Client{}
@@ -136,6 +141,66 @@ func TestStartCleaningDryRunEqualMinMaxValues(t *testing.T) {
 	assert.Nil(t, err)
 
 	startOpts.SetZeroValues()
+}
+
+func TestStartCleaningSpecificFileExtensions(t *testing.T) {
+	m := &mockS3Client{}
+
+	startOpts := options2.GetStartOptions()
+	startOpts.DryRun = true
+	startOpts.AutoApprove = true
+	startOpts.MinFileSizeInMb = 0
+	startOpts.MaxFileSizeInMb = 0
+	startOpts.FileExtensions = "txt,json"
+	defaultListObjectsOutput = &s3.ListObjectsOutput{
+		Name:        aws.String(""),
+		Marker:      aws.String(""),
+		MaxKeys:     aws.Int64(1000),
+		Prefix:      aws.String(""),
+		IsTruncated: aws.Bool(false),
+		Contents: []*s3.Object{
+			{
+				ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5449d"),
+				Key:          aws.String("file1.txt"),
+				StorageClass: aws.String("STANDARD"),
+				Size:         aws.Int64(1000),
+				LastModified: aws.Time(time.Now()),
+			},
+			{
+				ETag:         aws.String("03c0fe42b7efa3470fc99037a8e54122"),
+				Key:          aws.String("file2.txt"),
+				StorageClass: aws.String("STANDARD"),
+				Size:         aws.Int64(2000),
+				LastModified: aws.Time(time.Now()),
+			},
+			{
+				ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5443d"),
+				Key:          aws.String("file3.txt"),
+				StorageClass: aws.String("STANDARD"),
+				Size:         aws.Int64(3000),
+				LastModified: aws.Time(time.Now()),
+			},
+			{
+				ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5443d"),
+				Key:          aws.String("file5.json"),
+				StorageClass: aws.String("STANDARD"),
+				Size:         aws.Int64(3000),
+				LastModified: aws.Time(time.Now()),
+			},
+			{
+				ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5443d"),
+				Key:          aws.String("file6.json"),
+				StorageClass: aws.String("STANDARD"),
+				Size:         aws.Int64(3000),
+				LastModified: aws.Time(time.Now()),
+			},
+		},
+	}
+	err := StartCleaning(m, startOpts, mockLogger)
+	assert.Nil(t, err)
+
+	startOpts.SetZeroValues()
+	setZeroValuesForVars()
 }
 
 func TestStartCleaningDryRunNotEqualMinMaxValues(t *testing.T) {
@@ -163,7 +228,7 @@ func TestStartCleaningListError(t *testing.T) {
 	assert.NotNil(t, err)
 
 	startOpts.SetZeroValues()
-	setZeroValuesForErrors()
+	setZeroValuesForVars()
 }
 
 func TestStartCleaningDeleteError(t *testing.T) {
@@ -177,11 +242,46 @@ func TestStartCleaningDeleteError(t *testing.T) {
 	assert.NotNil(t, err)
 
 	startOpts.SetZeroValues()
-	setZeroValuesForErrors()
+	setZeroValuesForVars()
 }
 
-func setZeroValuesForErrors() {
+func setZeroValuesForVars() {
 	listObjectsErr = nil
 	getObjectsErr = nil
 	deleteObjectErr = nil
+	defaultListObjectsOutput = &s3.ListObjectsOutput{
+		Name:        aws.String(""),
+		Marker:      aws.String(""),
+		MaxKeys:     aws.Int64(1000),
+		Prefix:      aws.String(""),
+		IsTruncated: aws.Bool(false),
+		Contents: []*s3.Object{
+			{
+				ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5449d"),
+				Key:          aws.String("file1.txt"),
+				StorageClass: aws.String("STANDARD"),
+				Size:         aws.Int64(1000),
+				LastModified: aws.Time(time.Now()),
+			},
+			{
+				ETag:         aws.String("03c0fe42b7efa3470fc99037a8e54122"),
+				Key:          aws.String("file2.txt"),
+				StorageClass: aws.String("STANDARD"),
+				Size:         aws.Int64(2000),
+				LastModified: aws.Time(time.Now()),
+			},
+			{
+				ETag:         aws.String("03c0fe42b7efa3470fc99037a8e5443d"),
+				Key:          aws.String("file3.txt"),
+				StorageClass: aws.String("STANDARD"),
+				Size:         aws.Int64(3000),
+				LastModified: aws.Time(time.Now()),
+			},
+		},
+	}
+	defaultDeleteObjectOutput = &s3.DeleteObjectOutput{
+		DeleteMarker:   nil,
+		RequestCharged: nil,
+		VersionId:      nil,
+	}
 }
