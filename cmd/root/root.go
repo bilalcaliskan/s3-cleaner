@@ -35,7 +35,7 @@ var (
 				logging.EnableDebugLogging()
 			}
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger(opts)
 			logger.Info().Str("appVersion", ver.GitVersion).Str("goVersion", ver.GoVersion).Str("goOS", ver.GoOs).
 				Str("goArch", ver.GoArch).Str("gitCommit", ver.GitCommit).Str("buildDate", ver.BuildDate).
 				Msg("s3-cleaner is started!")

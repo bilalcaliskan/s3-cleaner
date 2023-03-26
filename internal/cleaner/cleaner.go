@@ -5,15 +5,14 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 
-	root "github.com/bilalcaliskan/s3-cleaner/cmd/root/options"
 	start "github.com/bilalcaliskan/s3-cleaner/cmd/start/options"
 	"github.com/bilalcaliskan/s3-cleaner/internal/aws"
 	"github.com/bilalcaliskan/s3-cleaner/internal/utils"
 	"github.com/rs/zerolog"
 )
 
-func StartCleaning(svc s3iface.S3API, rootOpts *root.RootOptions, startOpts *start.StartOptions, logger zerolog.Logger) error {
-	allFiles, err := aws.GetAllFiles(svc, rootOpts)
+func StartCleaning(svc s3iface.S3API, startOpts *start.StartOptions, logger zerolog.Logger) error {
+	allFiles, err := aws.GetAllFiles(svc, startOpts.RootOptions)
 	if err != nil {
 		return err
 	}
@@ -21,10 +20,18 @@ func StartCleaning(svc s3iface.S3API, rootOpts *root.RootOptions, startOpts *sta
 	res := getProperObjects(startOpts, allFiles, logger)
 	sortObjects(res, startOpts)
 
+	border := len(res) - startOpts.KeepLastNFiles
+	if border < 0 {
+		logger.Warn().
+			Int("arrayLength", len(res)).
+			Int("keepLastNFiles", startOpts.KeepLastNFiles).
+			Msg("not enough file, length of array is smaller than --keepLastNFiles flag")
+		return nil
+	}
+
 	targetObjects := res[:len(res)-startOpts.KeepLastNFiles]
 	if err := checkLength(targetObjects); err != nil {
-		logger.Warn().Str("bucket", rootOpts.BucketName).Str("region", rootOpts.Region).
-			Msg(err.Error())
+		logger.Warn().Msg(err.Error())
 		return nil
 	}
 
@@ -34,18 +41,18 @@ func StartCleaning(svc s3iface.S3API, rootOpts *root.RootOptions, startOpts *sta
 		buffer.WriteString(v)
 	}
 
+	logger.Info().Any("files", keys).Msg("will attempt to delete these files")
 	if startOpts.DryRun {
 		logger.Info().Msg("skipping object deletion since --dryRun flag is passed")
 		return nil
 	}
 
 	if err := promptDeletion(startOpts, logger, keys); err != nil {
-		logger.Error().Str("error", err.Error()).Msg("an error occurred while prompting file deletion")
+		logger.Warn().Str("error", err.Error()).Msg("an error occurred while prompting file deletion")
 		return err
 	}
 
-	logger.Info().Any("files", keys).Msg("will attempt to delete these files")
-	if err := aws.DeleteFiles(svc, rootOpts.BucketName, targetObjects, startOpts.DryRun, logger); err != nil {
+	if err := aws.DeleteFiles(svc, startOpts.RootOptions.BucketName, targetObjects, startOpts.DryRun, logger); err != nil {
 		logger.Error().Str("error", err.Error()).Msg("an error occurred while deleting target files")
 		return err
 	}

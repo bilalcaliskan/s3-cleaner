@@ -32,19 +32,29 @@ func TestRootOptions_SetAccessCredentialsFromEnv_Filled(t *testing.T) {
 
 	err := os.Setenv("AWS_REGION", "us-east-1")
 	assert.Nil(t, err)
+	err = opts.SetAccessCredentialsFromEnv(&cmd)
+	assert.Nil(t, err)
+	err = os.Setenv("AWS_REGION", "")
+	assert.Nil(t, err)
 
 	err = os.Setenv("AWS_ACCESS_KEY", "xxxxx")
 	assert.Nil(t, err)
-
-	err = os.Setenv("AWS_SECRET_KEY", "xxxxx")
+	err = opts.SetAccessCredentialsFromEnv(&cmd)
+	assert.Nil(t, err)
+	err = os.Setenv("AWS_ACCESS_KEY", "")
 	assert.Nil(t, err)
 
 	err = os.Setenv("AWS_SECRET_KEY", "xxxxx")
+	assert.Nil(t, err)
+	err = opts.SetAccessCredentialsFromEnv(&cmd)
+	assert.Nil(t, err)
+	err = os.Setenv("AWS_SECRET_KEY", "")
 	assert.Nil(t, err)
 
 	err = os.Setenv("AWS_BUCKET_NAME", "xxxxx")
 	assert.Nil(t, err)
-
 	err = opts.SetAccessCredentialsFromEnv(&cmd)
+	assert.Nil(t, err)
+	err = os.Setenv("AWS_BUCKET_NAME", "")
 	assert.Nil(t, err)
 }
