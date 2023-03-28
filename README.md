@@ -38,13 +38,16 @@ Flags:
       --sortBy string           defines the ascending order in the specified criteria, valid options are "lastModificationDate" and "size" (default "lastModificationDate")
 
 Global Flags:
-      --accessKey string        access key credential to access S3 bucket (default "")
-      --bucketName string       name of the target bucket on S3 (default "")
+      --accessKey string        access key credential to access S3 bucket, this value also can be passed via "AWS_ACCESS_KEY" environment variable (default "")
+      --secretKey string        secret key credential to access S3 bucket, this value also can be passed via "AWS_SECRET_KEY" environment variable (default "")
+      --region string           region of the target bucket on S3, this value also can be passed via "AWS_REGION" environment variable (default "")
+      --bucketName string       name of the target bucket on S3, this value also can be passed via "AWS_BUCKET_NAME" environment variable (default "")
       --fileNamePrefix string   folder name of target bucket objects, means it can be used for folder-based object grouping buckets (default "")
-      --region string           region of the target bucket on S3 (default "")
-      --secretKey string        secret key credential to access S3 bucket (default "")
   -v, --verbose                 verbose output of the logging library (default false)
 ```
+
+> **WARNING:**
+> Please note that environmental flags for accessing AWS (--accessKey, --secretKey etc.) takes precedence over environment variables for these flags (AWS_ACCESS_KEY, AWS_SECRET_KEY etc.)
 
 ## Installation
 
