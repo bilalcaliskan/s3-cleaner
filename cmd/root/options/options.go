@@ -32,15 +32,18 @@ type RootOptions struct {
 
 func (opts *RootOptions) InitFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVarP(&opts.BucketName, "bucketName", "", "", "name of "+
-		"the target bucket on S3 (default \"\")")
+		"the target bucket on S3, this value also can be passed via \"AWS_BUCKET_NAME\" environment variable (default \"\")")
 	cmd.PersistentFlags().StringVarP(&opts.FileNamePrefix, "fileNamePrefix", "", "",
 		"folder name of target bucket objects, means it can be used for folder-based object grouping buckets (default \"\")")
 	cmd.PersistentFlags().StringVarP(&opts.AccessKey, "accessKey", "", "",
-		"access key credential to access S3 bucket (default \"\")")
+		"access key credential to access S3 bucket, this value also can be passed via \"AWS_ACCESS_KEY\" "+
+			"environment variable (default \"\")")
 	cmd.PersistentFlags().StringVarP(&opts.SecretKey, "secretKey", "", "",
-		"secret key credential to access S3 bucket (default \"\")")
+		"secret key credential to access S3 bucket, this value also can be passed via \"AWS_SECRET_KEY\" "+
+			"environment variable (default \"\")")
 	cmd.PersistentFlags().StringVarP(&opts.Region, "region", "", "",
-		"region of the target bucket on S3 (default \"\")")
+		"region of the target bucket on S3, this value also can be passed via \"AWS_REGION\" environment "+
+			"variable (default \"\")")
 	cmd.PersistentFlags().BoolVarP(&opts.VerboseLog, "verbose", "", false,
 		"verbose output of the logging library (default false)")
 }

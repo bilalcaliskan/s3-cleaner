@@ -1,13 +1,10 @@
 ---
 name: PR
-
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-
 env:
   GO111MODULE: on
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -22,7 +19,6 @@ jobs:
         run: make -s lint
       - name: Clean downloaded binaries
         run: make -s clean
-
   fmt:
     runs-on: ubuntu-latest
     steps:
@@ -37,7 +33,6 @@ jobs:
         run: make -s fmt
       - name: Clean downloaded binaries
         run: make -s clean
-
   test:
     strategy:
       matrix:
@@ -53,7 +48,6 @@ jobs:
           cache: true
       - name: Test
         run: make -s test
-
   codeql:
     runs-on: ubuntu-latest
     permissions:
@@ -77,8 +71,6 @@ jobs:
         uses: github/codeql-action/analyze@v2
         with:
           category: "/language:${{matrix.language}}"
-
-
   sonarcloud:
     runs-on: ubuntu-latest
     steps:
@@ -100,12 +92,11 @@ jobs:
         with:
           args: >
             -Dproject.settings=build/ci/sonar-project.properties
-#      - name: SonarQube Quality Gate check
-#        uses: sonarsource/sonarqube-quality-gate-action@master
-#        timeout-minutes: 5
-#        env:
-#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
+      - name: SonarQube Quality Gate check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   build:
     strategy:
       matrix:
